@@ -1,0 +1,32 @@
+name: Run Python tests
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: The Python version to use
+        type: number
+        required: false
+        default: 3.8
+      requirements:
+        description: The path to the requirements file
+        type: string
+        required: false
+        default: requirements/dev.txt.lock
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  run-tests:
+    name: Run tests
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python-version }}
+      - uses: logikal-io/pip-install@v1.0.0
+        with:
+          requirements: ${{ inputs.requirements }}
+      - run: pytest
