@@ -23,6 +23,7 @@ jobs:
           # Latest versions as of 2022-10-15
           TFENV_VERSION: 1ccfddb22005b34eacaf06a9c33f58f14e816ec9  # commit date 2022-10-01
           TGENV_VERSION: dd720f62051bb748f75eee2d83d6768171d45830  # commit date 2020-04-18
+          TERRAGRUNT_COMMONS_VERSION: v1.0.0
         run: |-
           rm -rf /usr/local/bin/terraform
 
@@ -36,7 +37,8 @@ jobs:
           git checkout "${TGENV_VERSION}"
           ln -s ~/.tgenv/bin/* /usr/local/bin
 
-          git clone https://github.com/logikal-io/terragrunt-commons.git ~/.terragrunt
+          git clone https://github.com/logikal-io/terragrunt-commons.git \
+            -b ${TERRAGRUNT_COMMONS_VERSION} ~/.terragrunt
 
           cd "${{ github.workspace }}"
           cd "${{ inputs.root-dir }}"
@@ -49,5 +51,6 @@ jobs:
           download_url="https://github.com/terraform-linters/tflint/releases/download"
           wget "${download_url}/${TFLINT_VERSION}/tflint_linux_amd64.zip" -O ~/.tflint.zip
           unzip ~/.tflint.zip -d /usr/local/bin
+          chmod +x /usr/local/bin/tflint
 
       - run: terragrunt run-all validate
