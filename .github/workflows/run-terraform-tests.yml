@@ -24,13 +24,21 @@ jobs:
           TFENV_VERSION: 1ccfddb22005b34eacaf06a9c33f58f14e816ec9  # commit date 2022-10-01
           TGENV_VERSION: dd720f62051bb748f75eee2d83d6768171d45830  # commit date 2020-04-18
         run: |-
-          git clone https://github.com/tfutils/tfenv.git@${TFENV_VERSION} ~/.tfenv
-          mv ~/.tfenv/bin/terraform ~/.tfenv/bin/tfenv ~/.local/bin
+          pwd="$(pwd)"
 
-          git clone https://github.com/cunymatthieu/tgenv.git@${TGENV_VERSION} ~/.tgenv
-          mv ~/.tgenv/bin/terragrunt ~/.tgenv/bin/tgenv ~/.local/bin
+          git clone https://github.com/tfutils/tfenv.git ~/.tfenv
+          cd ~/.tfenv
+          git checkout "${TFENV_VERSION}"
+          ln -s ~/.tfenv/bin/* /usr/local/bin
 
-          git clone https://github.com/logikal-io/terragrunt-commons.git@v1.0.0 ~/.terragrunt
+          git clone https://github.com/cunymatthieu/tgenv.git ~/.tgenv
+          cd ~/.tgenv
+          git checkout "${TGENV_VERSION}"
+          ln -s ~/.tgenv/bin/* /usr/local/bin
+
+          git clone https://github.com/logikal-io/terragrunt-commons.git ~/.terragrunt
+
+          cd "${pwd}"
 
       - name: Check configuration
         run: |-
