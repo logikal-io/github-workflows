@@ -18,14 +18,12 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
-      - name: Install Terraform
+      - name: Install Terraform and Terragrunt
         env:
           # Latest versions as of 2022-10-15
           TFENV_VERSION: 1ccfddb22005b34eacaf06a9c33f58f14e816ec9  # commit date 2022-10-01
           TGENV_VERSION: dd720f62051bb748f75eee2d83d6768171d45830  # commit date 2020-04-18
         run: |-
-          pwd="$(pwd)"
-
           rm /usr/local/bin/terraform
 
           git clone https://github.com/tfutils/tfenv.git ~/.tfenv
@@ -40,9 +38,7 @@ jobs:
 
           git clone https://github.com/logikal-io/terragrunt-commons.git ~/.terragrunt
 
-          cd "${pwd}"
-
-      - name: Check configuration
-        run: |-
           cd "${{ inputs.root-dir }}"
-          terragrunt run-all validate
+          tgenv install
+
+      - run: terragrunt run-all validate
