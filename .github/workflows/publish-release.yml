@@ -1,0 +1,123 @@
+name: Publish release
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: The name of the package to publish
+        type: string
+        required: true
+      python-version:
+        description: The Python version to use
+        type: number
+        required: false
+        default: 3.8
+      docs-requirements:
+        description: The path to the requirements file to use for documentation building
+        type: string
+        required: false
+        default: requirements/docs.txt
+      build-requirements:
+        description: The path to the requirements file to use for package building
+        type: string
+        required: false
+        default: requirements/build.txt
+
+    secrets:
+      PYPI_API_TOKEN:
+        description: The PyPI access token to use for uploading the package
+        required: true
+      WORKLOAD_IDENTITY_PROVIDER:
+        description: Full identifier of the GitHub workload identity pool provider in Google Cloud
+        required: true
+      DOCS_UPLOADER_SERVICE_ACCOUNT:
+        description: Email of the Google Cloud service account for uploading documentation files
+        required: true
+      DOCS_TARGET_BUCKET:
+        description: The gsutil target bucket path to upload the documentation to
+        required: true
+      DOCS_HTTP_URL_MAP:
+        description: The name of the HTTP URL map (load balancer) to use for cache invalidation
+        required: true
+      DOCS_HTTPS_URL_MAP:
+        description: The name of the HTTPS URL map (load balancer) to use for cache invalidation
+        required: true
+
+jobs:
+  documentation:
+    name: Publish documentation
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: google-github-actions/auth@v0.8.1
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.DOCS_UPLOADER_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v0.6.0
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python-version }}
+      - uses: logikal-io/make-orb@v1.0.0
+        with:
+          requirements: ${{ inputs.docs-requirements }}
+
+      - name: Get latest tag
+        id: tags
+        run: |-
+          latest="$(git ls-remote --tags --sort=version:refname | tail -n 1)"
+          latest="$(echo "${latest}" | sed 's|.*refs/tags/||g')"
+          echo "latest=${latest}" >> $GITHUB_OUTPUT
+
+      - name: Build documentation
+        run: orb --command 'docs --build'
+
+      - name: Upload documentation
+        shell: bash
+        env:
+          tag: ${{ github.ref_name }}
+        run: |-
+          version="${tag:1}"
+          if [[ ! ${version} ]]; then
+            echo "Invalid tag"
+            exit 1
+          fi
+          gsutil -m rsync -r -d -j html,css,js -x "\.buildinfo|\.doctrees" \
+            docs/build "${{ secrets.DOCS_TARGET_BUCKET }}/${{ inputs.name }}/${version}"
+
+      - name: Upload latest documentation
+        if: github.ref_name == steps.tags.outputs.latest
+        run: >-
+          gsutil -m rsync -r -d -j html,css,js -x "\.buildinfo|\.doctrees"
+            docs/build "${{ secrets.DOCS_TARGET_BUCKET }}/${{ inputs.name }}/latest"
+
+      - name: Invalidate CDN cache
+        if: github.ref_name == steps.tags.outputs.latest
+        run: |-
+          gcloud compute url-maps invalidate-cdn-cache \
+            "${{ secrets.DOCS_HTTP_URL_MAP }}" --path "/${{ inputs.name }}/latest/*"
+          gcloud compute url-maps invalidate-cdn-cache \
+            "${{ secrets.DOCS_HTTPS_URL_MAP }}" --path "/${{ inputs.name }}/latest/*"
+
+  package:
+    name: Publish package
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python-version }}
+      - uses: logikal-io/make-orb@v1.0.0
+        with:
+          requirements: ${{ inputs.build-requirements }}
+
+      - name: Build package
+        run: orb --command 'python -m build --sdist --wheel'
+
+      # TODO: enable this
+      # - name: Upload package
+      #   env:
+      #     TWINE_USERNAME: __token__
+      #     TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      #   run: orb --command 'twine upload --non-interactive dist/*'
