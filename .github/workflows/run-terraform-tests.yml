@@ -26,6 +26,8 @@ jobs:
         run: |-
           pwd="$(pwd)"
 
+          rm /usr/local/bin/terraform
+
           git clone https://github.com/tfutils/tfenv.git ~/.tfenv
           cd ~/.tfenv
           git checkout "${TFENV_VERSION}"
