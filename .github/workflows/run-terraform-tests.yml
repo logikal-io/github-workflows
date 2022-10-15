@@ -24,7 +24,7 @@ jobs:
           TFENV_VERSION: 1ccfddb22005b34eacaf06a9c33f58f14e816ec9  # commit date 2022-10-01
           TGENV_VERSION: dd720f62051bb748f75eee2d83d6768171d45830  # commit date 2020-04-18
         run: |-
-          rm /usr/local/bin/terraform
+          rm -rf /usr/local/bin/terraform
 
           git clone https://github.com/tfutils/tfenv.git ~/.tfenv
           cd ~/.tfenv
@@ -41,5 +41,13 @@ jobs:
           cd "${{ github.workspace }}"
           cd "${{ inputs.root-dir }}"
           tgenv install
+
+      - name: Install tflint
+        env:
+          TFLINT_VERSION: v0.41.0
+        run: |-
+          download_url="https://github.com/terraform-linters/tflint/releases/download"
+          wget "${download_url}/${TFLINT_VERSION}/tflint_linux_amd64.zip" -O ~/.tflint.zip
+          unzip ~/.tflint.zip -d /usr/local/bin
 
       - run: terragrunt run-all validate
