@@ -1,0 +1,38 @@
+name: Run Terraform tests
+on:
+  workflow_call:
+    inputs:
+      root-dir:
+        description: The root directory in which to run Terragrunt
+        type: string
+        required: false
+        default: cloud
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  run-tests:
+    name: Run tests
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Terraform
+        env:
+          # Latest versions as of 2022-10-15
+          TFENV_VERSION: 1ccfddb22005b34eacaf06a9c33f58f14e816ec9  # commit date 2022-10-01
+          TGENV_VERSION: dd720f62051bb748f75eee2d83d6768171d45830  # commit date 2020-04-18
+        run: |-
+          git clone git@github.com:tfutils/tfenv.git@${TFENV_VERSION} ~/.tfenv
+          mv ~/.tfenv/bin/terraform ~/.tfenv/bin/tfenv ~/.local/bin
+
+          git clone git@github.com:cunymatthieu/tgenv.git@${TGENV_VERSION} ~/.tgenv
+          mv ~/.tgenv/bin/terragrunt ~/.tgenv/bin/tgenv ~/.local/bin
+
+          git clone git@github.com:logikal-io/terragrunt-commons.git@v1.0.0 ~/.terragrunt
+
+      - name: Check configuration
+        run: |-
+          cd "${{ inputs.root-dir }}"
+          terragrunt run-all validate
