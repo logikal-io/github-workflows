@@ -54,4 +54,5 @@ jobs:
           unzip ~/tflint.zip -d /usr/local/bin
           chmod +x /usr/local/bin/tflint
 
-      - run: terragrunt run-all validate
+      - name: Validate configuration
+        run: terragrunt run-all validate --terragrunt-parallelism 1
