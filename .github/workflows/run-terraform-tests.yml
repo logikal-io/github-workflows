@@ -27,15 +27,15 @@ jobs:
         run: |-
           rm -rf /usr/local/bin/terraform
 
-          git clone https://github.com/tfutils/tfenv.git ~/.tfenv
-          cd ~/.tfenv
+          git clone https://github.com/tfutils/tfenv.git ~/tfenv
+          cd ~/tfenv
           git checkout "${TFENV_VERSION}"
-          ln -s ~/.tfenv/bin/* /usr/local/bin
+          ln -s ~/tfenv/bin/* /usr/local/bin
 
-          git clone https://github.com/cunymatthieu/tgenv.git ~/.tgenv
-          cd ~/.tgenv
+          git clone https://github.com/cunymatthieu/tgenv.git ~/tgenv
+          cd ~/tgenv
           git checkout "${TGENV_VERSION}"
-          ln -s ~/.tgenv/bin/* /usr/local/bin
+          ln -s ~/tgenv/bin/* /usr/local/bin
 
           git clone https://github.com/logikal-io/terragrunt-commons.git \
             -b ${TERRAGRUNT_COMMONS_VERSION} ~/.terragrunt
@@ -49,8 +49,9 @@ jobs:
           TFLINT_VERSION: v0.41.0
         run: |-
           download_url="https://github.com/terraform-linters/tflint/releases/download"
-          wget "${download_url}/${TFLINT_VERSION}/tflint_linux_amd64.zip" -O ~/.tflint.zip
-          unzip ~/.tflint.zip -d /usr/local/bin
+          wget "${download_url}/${TFLINT_VERSION}/tflint_linux_amd64.zip" \
+            --progress=dot:giga -O ~/tflint.zip
+          unzip ~/tflint.zip -d /usr/local/bin
           chmod +x /usr/local/bin/tflint
 
       - run: terragrunt run-all validate
