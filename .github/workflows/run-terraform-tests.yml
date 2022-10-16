@@ -61,4 +61,4 @@ jobs:
           TERRAGRUNT_USE_CREDENTIALS: false
         run: |-
           cd "${{ inputs.root-dir }}"
-          terragrunt run-all validate --terragrunt-parallelism 1 --terragrunt-no-auto-init
+          terragrunt run-all validate --terragrunt-parallelism 1
