@@ -25,6 +25,8 @@ jobs:
           TGENV_VERSION: dd720f62051bb748f75eee2d83d6768171d45830  # commit date 2020-04-18
           TERRAGRUNT_COMMONS_VERSION: v1.0.1
         run: |-
+          git config --global advice.detachedHead false
+
           rm -rf /usr/local/bin/terraform
 
           git clone https://github.com/tfutils/tfenv.git ~/tfenv
@@ -55,4 +57,6 @@ jobs:
           chmod +x /usr/local/bin/tflint
 
       - name: Validate configuration
-        run: terragrunt run-all validate --terragrunt-parallelism 1
+        run: |-
+          cd "${{ inputs.root-dir }}"
+          terragrunt run-all validate --terragrunt-parallelism 1
