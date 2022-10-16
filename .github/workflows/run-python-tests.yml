@@ -29,4 +29,15 @@ jobs:
       - uses: logikal-io/make-orb@v1.0.0
         with:
           requirements: ${{ inputs.requirements }}
-      - run: orb --command pytest
+
+      - name: Run pytest
+        run: orb --command pytest
+
+      - name: Upload pytest artifacts
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: pytest-artifacts
+          path: /tmp/pytest-of-runner/
+          if-no-files-found: ignore
+          retention-days: 1
