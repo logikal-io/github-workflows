@@ -9,7 +9,7 @@ on:
         default: cloud
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  group: ${{ github.workflow }}-terraform-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
