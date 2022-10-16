@@ -57,6 +57,8 @@ jobs:
           chmod +x /usr/local/bin/tflint
 
       - name: Validate configuration
+        env:
+          TERRAGRUNT_USE_CREDENTIALS: 0
         run: |-
           cd "${{ inputs.root-dir }}"
           terragrunt run-all validate --terragrunt-parallelism 1 --terragrunt-no-auto-init
