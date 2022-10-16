@@ -14,7 +14,7 @@ on:
         default: requirements/dev.txt
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  group: ${{ github.workflow }}-python-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
