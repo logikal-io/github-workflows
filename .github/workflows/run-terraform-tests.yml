@@ -23,7 +23,7 @@ jobs:
           # Latest versions as of 2022-10-15
           TFENV_VERSION: 1ccfddb22005b34eacaf06a9c33f58f14e816ec9  # commit date 2022-10-01
           TGENV_VERSION: dd720f62051bb748f75eee2d83d6768171d45830  # commit date 2020-04-18
-          TERRAGRUNT_COMMONS_VERSION: v1.0.1
+          TERRAGRUNT_COMMONS_VERSION: v1.0.2-dev1
         run: |-
           git config --global advice.detachedHead false
 
