@@ -51,7 +51,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v3
-        fetch-depth: 0
+        with:
+          fetch-depth: 0
       - uses: google-github-actions/auth@v0.8.1
         with:
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
