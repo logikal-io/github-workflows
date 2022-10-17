@@ -95,9 +95,9 @@ jobs:
         if: github.ref_name == steps.tags.outputs.latest
         run: |-
           gcloud compute url-maps invalidate-cdn-cache \
-            "${{ secrets.DOCS_HTTP_URL_MAP }}" --path "/${{ inputs.name }}/latest/*"
-          gcloud compute url-maps invalidate-cdn-cache \
             "${{ secrets.DOCS_HTTPS_URL_MAP }}" --path "/${{ inputs.name }}/latest/*"
+          gcloud compute url-maps invalidate-cdn-cache \
+            "${{ secrets.DOCS_HTTP_URL_MAP }}" --path "/${{ inputs.name }}/latest/*"
 
   package:
     name: Publish package
