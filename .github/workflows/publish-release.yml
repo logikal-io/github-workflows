@@ -114,9 +114,8 @@ jobs:
       - name: Build package
         run: orb --command 'python -m build --sdist --wheel'
 
-      # TODO: enable this
-      # - name: Upload package
-      #   env:
-      #     TWINE_USERNAME: __token__
-      #     TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-      #   run: orb --command 'twine upload --non-interactive dist/*'
+      - name: Upload package
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: orb --command 'twine upload --non-interactive dist/*'
