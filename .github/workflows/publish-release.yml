@@ -26,7 +26,7 @@ on:
       PYPI_API_TOKEN:
         description: The PyPI access token to use for uploading the package
         required: true
-      WORKLOAD_IDENTITY_PROVIDER:
+      DOCS_WORKLOAD_IDENTITY_PROVIDER:
         description: Full identifier of the GitHub workload identity pool provider in Google Cloud
         required: true
       DOCS_UPLOADER_SERVICE_ACCOUNT:
@@ -55,7 +55,7 @@ jobs:
           fetch-depth: 0
       - uses: google-github-actions/auth@v0.8.1
         with:
-          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          workload_identity_provider: ${{ secrets.DOCS_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.DOCS_UPLOADER_SERVICE_ACCOUNT }}
       - uses: google-github-actions/setup-gcloud@v0.6.0
       - uses: actions/setup-python@v4
