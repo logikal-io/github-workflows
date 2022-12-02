@@ -1,0 +1,48 @@
+name: Push image
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: The name of the image
+        type: string
+        required: true
+      path:
+        description: The path to the folder containing the relevant Dockerfile
+        type: string
+        required: true
+      aws-role-to-assume:
+        description: The AWS role to assume
+        type: string
+        required: true
+      aws-region:
+        description: The AWS region to use
+        type: string
+        required: true
+
+jobs:
+  push-image:
+    name: Push image
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        id: aws
+        with:
+          role-to-assume: ${{ inputs.aws-role-to-assume }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Build and push image
+        env:
+          name: ${{ inputs.name }}:latest
+          registry: >-
+            ${{ steps.aws.outputs.aws-account-id }}.dkr.ecr.${{ inputs.aws-region }}.amazonaws.com
+        run: |-
+          aws ecr get-login-password --region "${{ inputs.aws-region }}" | \
+              docker login --username AWS --password-stdin "${registry}"
+          docker build --tag "${registry}/${name}" "${{ inputs.path }}"
+          docker push "${registry}/${name}"
