@@ -42,6 +42,8 @@ jobs:
           registry: >-
             ${{ steps.aws.outputs.aws-account-id }}.dkr.ecr.${{ inputs.aws-region }}.amazonaws.com
         run: |-
+          aws ecr-public get-login-password --region us-east-1 | \
+              docker login --username AWS --password-stdin public.ecr.aws
           aws ecr get-login-password --region "${{ inputs.aws-region }}" | \
               docker login --username AWS --password-stdin "${registry}"
           docker build --tag "${registry}/${name}" "${{ inputs.path }}"
