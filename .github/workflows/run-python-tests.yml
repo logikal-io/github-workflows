@@ -63,7 +63,7 @@ jobs:
         with:
           requirements: ${{ inputs.requirements }}
 
-      - uses: logikal-io/install-chrome
+      - uses: logikal-io/install-chrome@v1.0.0-dev0
         if: inputs.chrome-version != ''
         with:
           version: ${{ inputs.chrome-version }}
