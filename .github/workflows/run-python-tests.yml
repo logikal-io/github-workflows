@@ -12,6 +12,23 @@ on:
         type: string
         required: false
         default: requirements/dev.txt
+      chrome-version:
+        description: The Chrome and ChromeDriver version to install
+        type: string
+        required: false
+      hadoop-version:
+        description: The Hadoop version to install
+        type: string
+        required: false
+      hadoop-gcs-connector-version:
+        description: The Hadoop Google Cloud Storage connector version to install
+        type: string
+        required: false
+      hadoop-aws-module-version:
+        description: The Hadoop AWS module version to install
+        type: string
+        required: false
+
     secrets:
       TESTING_WORKLOAD_IDENTITY_PROVIDER:
         description: Full identifier of the GitHub workload identity pool provider in Google Cloud
@@ -37,12 +54,26 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.TESTING_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.TESTING_SERVICE_ACCOUNT }}
+
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ inputs.python-version }}
+
       - uses: logikal-io/make-orb@v1.0.0
         with:
           requirements: ${{ inputs.requirements }}
+
+      - uses: logikal-io/install-chrome@v1.0.0
+        if: inputs.chrome-version != ''
+        with:
+          version: ${{ inputs.chrome-version }}
+
+      - uses: logikal-io/install-hadoop@v1.0.0
+        if: inputs.hadoop-version != ''
+        with:
+          version: ${{ inputs.hadoop-version }}
+          gcs-connector-version: ${{ inputs.hadoop-gcs-connector-version }}
+          aws-module-version: ${{ inputs.hadoop-aws-module-version }}
 
       - name: Run pytest
         run: orb --command pytest
@@ -54,4 +85,4 @@ jobs:
           name: pytest-artifacts
           path: /tmp/pytest-of-runner/
           if-no-files-found: ignore
-          retention-days: 1
+          retention-days: 7
