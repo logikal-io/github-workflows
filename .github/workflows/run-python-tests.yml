@@ -63,17 +63,17 @@ jobs:
         with:
           requirements: ${{ inputs.requirements }}
 
-      - uses: logikal-io/install-chrome@v1.0.0
+      - uses: logikal-io/install-chrome
         if: inputs.chrome-version != ''
         with:
           version: ${{ inputs.chrome-version }}
 
-      - uses: logikal-io/install-hadoop@v1.0.0
-        if: inputs.hadoop-version != ''
-        with:
-          version: ${{ inputs.hadoop-version }}
-          gcs-connector-version: ${{ inputs.hadoop-gcs-connector-version }}
-          aws-module-version: ${{ inputs.hadoop-aws-module-version }}
+      # - uses: logikal-io/install-hadoop@v1.0.0
+      #   if: inputs.hadoop-version != ''
+      #   with:
+      #     version: ${{ inputs.hadoop-version }}
+      #     gcs-connector-version: ${{ inputs.hadoop-gcs-connector-version }}
+      #     aws-module-version: ${{ inputs.hadoop-aws-module-version }}
 
       - name: Run pytest
         run: orb --command pytest
