@@ -33,6 +33,9 @@ jobs:
   run-tests:
     name: Run tests
     runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v3
       - uses: google-github-actions/auth@v1
