@@ -91,17 +91,18 @@ jobs:
           sudo wget "${ENDPOINT}/gcs-connector-hadoop3-${VERSION}.jar" --progress=dot:giga \
             -O "/opt/hadoop/share/hadoop/common/lib/gcs-connector-hadoop3-${VERSION}.jar"
 
-          ls /opt/hadoop/share/hadoop/common/lib
-
           # Install AWS module
           echo "${SPARK_LOCAL_IP}"
           echo "${HADOOP_HOME}"
           echo "${HADOOP_COMMON_LIBS_JAR_DIR}"
           echo "${LD_LIBRARY_PATH}"
+
+          # Set environment variables
+          echo "HADOOP_HOME='/opt/hadoop'" >> $GITHUB_ENV
+          echo "HADOOP_COMMON_LIBS_JAR_DIR='${HADOOP_HOME}/share/hadoop/common/lib'" >> $GITHUB_ENV
+
           # export JAVA_HOME='/usr/lib/jvm/java-11-openjdk-amd64/'  # required by PySpark
           # export SPARK_LOCAL_IP='localhost'
-          # export HADOOP_HOME='/opt/hadoop'
-          # export HADOOP_COMMON_LIBS_JAR_DIR="${HADOOP_HOME}/share/hadoop/common/lib"
           # export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}${HADOOP_HOME}/lib/native"
 
       - name: Run pytest
