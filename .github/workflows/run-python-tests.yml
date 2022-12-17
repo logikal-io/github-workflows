@@ -28,6 +28,10 @@ on:
         description: The Hadoop AWS module version to install
         type: string
         required: false
+      aws-java-sdk-version:
+        description: The AWS Java SDK bundle version that was used to compile the Hadoop AWS module
+        type: string
+        required: false
 
     secrets:
       TESTING_WORKLOAD_IDENTITY_PROVIDER:
@@ -87,11 +91,23 @@ jobs:
           # Install Google Cloud Storage connector
           ENDPOINT='https://storage.googleapis.com/hadoop-lib/gcs'
           VERSION='${{ inputs.hadoop-gcs-connector-version }}'
-          echo "Installing Google Cloud Storage connetor ${VERSION}"
+          echo "Installing Google Cloud Storage connector ${VERSION}"
           sudo wget "${ENDPOINT}/gcs-connector-hadoop3-${VERSION}.jar" --progress=dot:giga \
             -O "/opt/hadoop/share/hadoop/common/lib/gcs-connector-hadoop3-${VERSION}.jar"
 
           # Install AWS module
+          ENDPOINT='https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws'
+          VERSION='${{ inputs.hadoop-aws-module-version }}'
+          echo "Installing Hadoop AWS module ${VERSION}"
+          sudo wget "${ENDPOINT}/${VERSION}/hadoop-aws-${VERSION}.jar" --progress=dot:giga \
+            -O "/opt/hadoop/share/hadoop/common/lib/hadoop-aws-${VERSION}.jar"
+
+          ENDPOINT='https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle'
+          VERSION='${{ inputs.aws-java-sdk-version }}'
+          echo "Installing AWS Java SDK ${VERSION}"
+          sudo wget "${ENDPOINT}/${VERSION}/aws-java-sdk-bundle-${VERSION}.jar" \
+            --progress=dot:giga \
+            -O "/opt/hadoop/share/hadoop/common/lib/aws-java-sdk-bundle-${VERSION}.jar"
 
           # Set environment variables
           echo "HADOOP_HOME=/opt/hadoop" >> $GITHUB_ENV
