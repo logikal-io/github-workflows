@@ -99,7 +99,7 @@ jobs:
 
           # Set environment variables
           echo "HADOOP_HOME='/opt/hadoop'" >> $GITHUB_ENV
-          echo "HADOOP_COMMON_LIBS_JAR_DIR='${HADOOP_HOME}/share/hadoop/common/lib'" >> $GITHUB_ENV
+          echo "HADOOP_COMMON_LIBS_JAR_DIR='/opt/hadoop/share/hadoop/common/lib'" >> $GITHUB_ENV
 
           # export JAVA_HOME='/usr/lib/jvm/java-11-openjdk-amd64/'  # required by PySpark
           # export SPARK_LOCAL_IP='localhost'
