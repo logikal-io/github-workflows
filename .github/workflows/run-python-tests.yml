@@ -88,8 +88,8 @@ jobs:
           ENDPOINT='https://storage.googleapis.com/hadoop-lib/gcs'
           VERSION='${{ inputs.hadoop-gcs-connector-version }}'
           echo "Installing Google Cloud Storage connetor ${VERSION}"
-          sudo wget "${ENDPOINT}/gcs-connector-hadoop3-${VERSION}.jar" \
-            --progress=dot:giga -O /opt/hadoop/share/hadoop/common/lib/
+          sudo wget "${ENDPOINT}/gcs-connector-hadoop3-${VERSION}.jar" --progress=dot:giga \
+            -O "/opt/hadoop/share/hadoop/common/lib/gcs-connector-hadoop3-${VERSION}.jar"
 
           ls /opt/hadoop/share/hadoop/common/lib
 
