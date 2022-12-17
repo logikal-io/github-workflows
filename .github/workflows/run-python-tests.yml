@@ -77,19 +77,17 @@ jobs:
           # Install Hadoop
           ENDPOINT='https://downloads.apache.org/hadoop/common/hadoop'
           VERSION='${{ inputs.hadoop-version }}'
-          echo 'Installing Hadoop ${VERSION}'
+          echo "Installing Hadoop ${VERSION}"
           wget "${ENDPOINT}-${VERSION}/hadoop-${VERSION}.tar.gz" \
             --progress=dot:giga -O /tmp/hadoop.tar.gz
-          sudo mkdir -p /opt/hadoop
-          sudo tar -xzf /tmp/hadoop.tar.gz --directory /opt/hadoop/
-
-          ls /opt
-          ls /opt/hadoop
+          sudo tar -xzf /tmp/hadoop.tar.gz --directory /opt/
+          sudo mv "/opt/hadoop-${VERSION}" /opt/hadoop
+          rm /tmp/hadoop.tar.gz
 
           # Install Google Cloud Storage connector
           ENDPOINT='https://storage.googleapis.com/hadoop-lib/gcs'
           VERSION='${{ inputs.hadoop-gcs-connector-version }}'
-          echo 'Installing Google Cloud Storage connetor ${VERSION}'
+          echo "Installing Google Cloud Storage connetor ${VERSION}"
           sudo wget "${ENDPOINT}/gcs-connector-hadoop3-${VERSION}.jar" \
             --progress=dot:giga -O /opt/hadoop/share/hadoop/common/lib/
 
