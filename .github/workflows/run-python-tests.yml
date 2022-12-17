@@ -16,6 +16,18 @@ on:
         description: The Chrome and ChromeDriver version to install
         type: string
         required: false
+      hadoop-version:
+        description: The Hadoop version to install
+        type: string
+        required: false
+      hadoop-gcs-connector-version:
+        description: The Hadoop Google Cloud Storage connector version to install
+        type: string
+        required: false
+      hadoop-aws-module-version:
+        description: The Hadoop AWS module version to install
+        type: string
+        required: false
 
     secrets:
       TESTING_WORKLOAD_IDENTITY_PROVIDER:
@@ -58,6 +70,41 @@ jobs:
         if: inputs.chrome-version != ''
         with:
           version: ${{ inputs.chrome-version }}
+
+      - name: Install Hadoop
+        if: inputs.hadoop-version != ''
+        run: |-
+          # Install Hadoop
+          ENDPOINT='https://downloads.apache.org/hadoop/common/hadoop'
+          VERSION='${{ inputs.hadoop-version }}'
+          echo 'Installing Hadoop ${VERSION}'
+          wget "${ENDPOINT}-${VERSION}/hadoop-${VERSION}.tar.gz" \
+            --progress=dot:giga -O /tmp/hadoop.tar.gz
+          sudo mkdir -p /opt/hadoop
+          sudo tar -xzf /tmp/hadoop.tar.gz --directory /opt/hadoop/
+
+          ls /opt
+          ls /opt/hadoop
+
+          # Install Google Cloud Storage connector
+          ENDPOINT='https://storage.googleapis.com/hadoop-lib/gcs'
+          VERSION='${{ inputs.hadoop-gcs-connector-version }}'
+          echo 'Installing Google Cloud Storage connetor ${VERSION}'
+          sudo wget "${ENDPOINT}/gcs-connector-hadoop3-${VERSION}.jar" \
+            --progress=dot:giga -O /opt/hadoop/share/hadoop/common/lib/
+
+          ls /opt/hadoop/share/hadoop/common/lib
+
+          # Install AWS module
+          echo "${SPARK_LOCAL_IP}"
+          echo "${HADOOP_HOME}"
+          echo "${HADOOP_COMMON_LIBS_JAR_DIR}"
+          echo "${LD_LIBRARY_PATH}"
+          # export JAVA_HOME='/usr/lib/jvm/java-11-openjdk-amd64/'  # required by PySpark
+          # export SPARK_LOCAL_IP='localhost'
+          # export HADOOP_HOME='/opt/hadoop'
+          # export HADOOP_COMMON_LIBS_JAR_DIR="${HADOOP_HOME}/share/hadoop/common/lib"
+          # export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}${HADOOP_HOME}/lib/native"
 
       - name: Run pytest
         run: orb --command pytest
