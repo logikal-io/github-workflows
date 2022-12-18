@@ -61,7 +61,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - id: google-auth
+      - name: Authenticate to Google Cloud Platform
         uses: google-github-actions/auth@v1
         env:
           RUN_STEP: ${{ secrets.GCP_TESTING_SERVICE_ACCOUNT != '' }}
@@ -70,7 +70,8 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_TESTING_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_TESTING_SERVICE_ACCOUNT }}
 
-      - uses: aws-actions/configure-aws-credentials@v1
+      - name: Authenticate to Amazon Web Services
+        uses: aws-actions/configure-aws-credentials@v1
         env:
           RUN_STEP: ${{ secrets.AWS_TESTING_ROLE != '' }}
         if: env.RUN_STEP == 'true'
@@ -126,8 +127,12 @@ jobs:
             -O "/opt/hadoop/share/hadoop/common/lib/aws-java-sdk-bundle-${VERSION}.jar"
 
           # Set environment variables
-          echo "HADOOP_HOME=/opt/hadoop" >> $GITHUB_ENV
-          echo "HADOOP_COMMON_LIBS_JAR_DIR=/opt/hadoop/share/hadoop/common/lib" >> $GITHUB_ENV
+          export HADOOP_HOME="/opt/hadoop"
+          echo "HADOOP_HOME=${HADOOP_HOME}" >> $GITHUB_ENV
+          export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}${HADOOP_HOME}/lib/native"
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+          export HADOOP_COMMON_LIBS_JAR_DIR="${HADOOP_HOME}/share/hadoop/common/lib"
+          echo "HADOOP_COMMON_LIBS_JAR_DIR=${HADOOP_COMMON_LIBS_JAR_DIR}" >> $GITHUB_ENV
 
       - name: Run pytest
         run: orb --command pytest
