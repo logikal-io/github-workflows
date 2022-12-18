@@ -92,47 +92,13 @@ jobs:
         with:
           version: ${{ inputs.chrome-version }}
 
-      - name: Install Hadoop
+      - uses: logikal-io/install-hadoop@v1.0.0
         if: inputs.hadoop-version != ''
-        run: |-
-          # Install Hadoop
-          ENDPOINT='https://downloads.apache.org/hadoop/common/hadoop'
-          VERSION='${{ inputs.hadoop-version }}'
-          echo "Installing Hadoop ${VERSION}"
-          wget "${ENDPOINT}-${VERSION}/hadoop-${VERSION}.tar.gz" \
-            --progress=dot:giga -O /tmp/hadoop.tar.gz
-          sudo tar -xzf /tmp/hadoop.tar.gz --directory /opt/
-          sudo mv "/opt/hadoop-${VERSION}" /opt/hadoop
-          rm /tmp/hadoop.tar.gz
-
-          # Install Google Cloud Storage connector
-          ENDPOINT='https://storage.googleapis.com/hadoop-lib/gcs'
-          VERSION='${{ inputs.hadoop-gcs-connector-version }}'
-          echo "Installing Google Cloud Storage connector ${VERSION}"
-          sudo wget "${ENDPOINT}/gcs-connector-hadoop3-${VERSION}.jar" --progress=dot:giga \
-            -O "/opt/hadoop/share/hadoop/common/lib/gcs-connector-hadoop3-${VERSION}.jar"
-
-          # Install AWS module
-          ENDPOINT='https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws'
-          VERSION='${{ inputs.hadoop-aws-module-version }}'
-          echo "Installing Hadoop AWS module ${VERSION}"
-          sudo wget "${ENDPOINT}/${VERSION}/hadoop-aws-${VERSION}.jar" --progress=dot:giga \
-            -O "/opt/hadoop/share/hadoop/common/lib/hadoop-aws-${VERSION}.jar"
-
-          ENDPOINT='https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle'
-          VERSION='${{ inputs.aws-java-sdk-version }}'
-          echo "Installing AWS Java SDK ${VERSION}"
-          sudo wget "${ENDPOINT}/${VERSION}/aws-java-sdk-bundle-${VERSION}.jar" \
-            --progress=dot:giga \
-            -O "/opt/hadoop/share/hadoop/common/lib/aws-java-sdk-bundle-${VERSION}.jar"
-
-          # Set environment variables
-          export HADOOP_HOME="/opt/hadoop"
-          echo "HADOOP_HOME=${HADOOP_HOME}" >> $GITHUB_ENV
-          export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}${HADOOP_HOME}/lib/native"
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
-          export HADOOP_COMMON_LIBS_JAR_DIR="${HADOOP_HOME}/share/hadoop/common/lib"
-          echo "HADOOP_COMMON_LIBS_JAR_DIR=${HADOOP_COMMON_LIBS_JAR_DIR}" >> $GITHUB_ENV
+        with:
+          version: ${{ inputs.hadoop-version }}
+          gcs-connector-version: ${{ inputs.hadoop-gcs-connector-version }}
+          aws-module-version: ${{ inputs.hadoop-aws-module-version }}
+          aws-java-sdk-version: ${{ inputs.aws-java-sdk-version }}
 
       - name: Run pytest
         run: orb --command pytest
