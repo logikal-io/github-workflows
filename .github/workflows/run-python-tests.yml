@@ -67,7 +67,6 @@ jobs:
           RUN_STEP: ${{ secrets.GCP_TESTING_SERVICE_ACCOUNT != '' }}
         if: env.RUN_STEP == 'true'
         with:
-          token_format: 'access_token'
           workload_identity_provider: ${{ secrets.GCP_TESTING_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_TESTING_SERVICE_ACCOUNT }}
 
@@ -131,8 +130,6 @@ jobs:
           echo "HADOOP_COMMON_LIBS_JAR_DIR=/opt/hadoop/share/hadoop/common/lib" >> $GITHUB_ENV
 
       - name: Run pytest
-        env:
-          GOOGLE_ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
         run: orb --command pytest
 
       - name: Upload pytest artifacts
