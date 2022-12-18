@@ -34,11 +34,17 @@ on:
         required: false
 
     secrets:
-      TESTING_WORKLOAD_IDENTITY_PROVIDER:
+      GCP_TESTING_WORKLOAD_IDENTITY_PROVIDER:
         description: Full identifier of the GitHub workload identity pool provider in Google Cloud
         required: false
-      TESTING_SERVICE_ACCOUNT:
+      GCP_TESTING_SERVICE_ACCOUNT:
         description: Email of the Google Cloud service account used for running tests
+        required: false
+      AWS_TESTING_ROLE:
+        description: The ARN of the AWS role used for running tests
+        required: false
+      AWS_TESTING_REGION:
+        description: The AWS region to use for authorization
         required: false
 
 concurrency:
@@ -54,13 +60,24 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v3
-      - uses: google-github-actions/auth@v1
+
+      - id: google-auth
+        uses: google-github-actions/auth@v1
         env:
-          RUN_STEP: ${{ secrets.TESTING_SERVICE_ACCOUNT != '' }}
+          RUN_STEP: ${{ secrets.GCP_TESTING_SERVICE_ACCOUNT != '' }}
         if: env.RUN_STEP == 'true'
         with:
-          workload_identity_provider: ${{ secrets.TESTING_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.TESTING_SERVICE_ACCOUNT }}
+          token_format: 'access_token'
+          workload_identity_provider: ${{ secrets.GCP_TESTING_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_TESTING_SERVICE_ACCOUNT }}
+
+      - uses: aws-actions/configure-aws-credentials@v1
+        env:
+          RUN_STEP: ${{ secrets.AWS_TESTING_ROLE != '' }}
+        if: env.RUN_STEP == 'true'
+        with:
+          aws-region: ${{ secrets.AWS_TESTING_REGION }}
+          role-to-assume: ${{ secrets.AWS_TESTING_ROLE }}
 
       - uses: actions/setup-python@v4
         with:
@@ -113,11 +130,9 @@ jobs:
           echo "HADOOP_HOME=/opt/hadoop" >> $GITHUB_ENV
           echo "HADOOP_COMMON_LIBS_JAR_DIR=/opt/hadoop/share/hadoop/common/lib" >> $GITHUB_ENV
 
-          # export JAVA_HOME='/usr/lib/jvm/java-11-openjdk-amd64/'  # required by PySpark
-          # export SPARK_LOCAL_IP='localhost'
-          # export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}${HADOOP_HOME}/lib/native"
-
       - name: Run pytest
+        env:
+          GOOGLE_ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
         run: orb --command pytest
 
       - name: Upload pytest artifacts
