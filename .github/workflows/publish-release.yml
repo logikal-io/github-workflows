@@ -79,11 +79,11 @@ jobs:
         with:
           python-version: ${{ inputs.python-version }}
 
-      - uses: logikal-io/make-orb@v1.0.0
+      - uses: logikal-io/make-orb@v1
         with:
           requirements: ${{ inputs.docs-requirements }}
 
-      - uses: logikal-io/install-hadoop@v1.0.0
+      - uses: logikal-io/install-hadoop@v1
         if: inputs.hadoop-version != ''
         with:
           version: ${{ inputs.hadoop-version }}
@@ -133,7 +133,7 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ inputs.python-version }}
-      - uses: logikal-io/make-orb@v1.0.0
+      - uses: logikal-io/make-orb@v1
         with:
           requirements: ${{ inputs.build-requirements }}
 

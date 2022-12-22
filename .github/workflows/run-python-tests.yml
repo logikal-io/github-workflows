@@ -83,16 +83,16 @@ jobs:
         with:
           python-version: ${{ inputs.python-version }}
 
-      - uses: logikal-io/make-orb@v1.0.0
+      - uses: logikal-io/make-orb@v1
         with:
           requirements: ${{ inputs.requirements }}
 
-      - uses: logikal-io/install-chrome@v1.0.0
+      - uses: logikal-io/install-chrome@v1
         if: inputs.chrome-version != ''
         with:
           version: ${{ inputs.chrome-version }}
 
-      - uses: logikal-io/install-hadoop@v1.0.0
+      - uses: logikal-io/install-hadoop@v1
         if: inputs.hadoop-version != ''
         with:
           version: ${{ inputs.hadoop-version }}
