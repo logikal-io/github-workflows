@@ -59,6 +59,7 @@ jobs:
 
           cd "${{ github.workspace }}"
           cd "${{ inputs.root-dir }}"
+          pwd
           tgenv install
 
       - name: Install tflint

@@ -105,7 +105,7 @@ jobs:
           aws-java-sdk-version: ${{ inputs.aws-java-sdk-version }}
 
       - name: Run pytest
-        run: orb --command pytest ${{ inputs.pytest-options }}
+        run: orb --command 'pytest ${{ inputs.pytest-options }}'
 
       - name: Upload pytest artifacts
         uses: actions/upload-artifact@v3
