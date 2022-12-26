@@ -59,7 +59,7 @@ jobs:
 
           cd "${{ github.workspace }}"
           cd "${{ inputs.root-dir }}"
-          pwd
+          echo "Installing Terragrunt at '$(pwd)'"
           tgenv install
 
       - name: Install tflint
