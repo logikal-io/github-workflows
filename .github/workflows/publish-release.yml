@@ -51,11 +51,11 @@ on:
       DOCS_TARGET_BUCKET:
         description: The gsutil target bucket path to upload the documentation to
         required: true
-      DOCS_HTTP_URL_MAP:
-        description: The name of the HTTP URL map (load balancer) to use for cache invalidation
+      DOCS_WEBSITE_SERVICE_URL_MAP:
+        description: The website service URL map name to use for CDN cache invalidation
         required: true
-      DOCS_HTTPS_URL_MAP:
-        description: The name of the HTTPS URL map (load balancer) to use for cache invalidation
+      DOCS_HTTPS_REDIRECT_URL_MAP:
+        description: The HTTP to HTTPS redirection URL map name to use for CDN cache invalidation
         required: true
 
 jobs:
@@ -121,9 +121,9 @@ jobs:
         if: github.ref_name == steps.tags.outputs.latest
         run: |-
           gcloud compute url-maps invalidate-cdn-cache \
-            "${{ secrets.DOCS_HTTPS_URL_MAP }}" --path "/${{ inputs.name }}/latest/*"
+            "${{ secrets.DOCS_WEBSITE_SERVICE_URL_MAP }}" --path "/${{ inputs.name }}/latest/*"
           gcloud compute url-maps invalidate-cdn-cache \
-            "${{ secrets.DOCS_HTTP_URL_MAP }}" --path "/${{ inputs.name }}/latest/*"
+            "${{ secrets.DOCS_HTTPS_REDIRECT_URL_MAP }}" --path "/${{ inputs.name }}/latest/*"
 
   package:
     name: Publish package
