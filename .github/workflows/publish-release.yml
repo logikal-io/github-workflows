@@ -109,13 +109,13 @@ jobs:
             exit 1
           fi
           gsutil -m rsync -r -d -j html,css,js -x "\.buildinfo|\.doctrees" \
-            docs/build "${{ secrets.DOCS_TARGET_BUCKET }}/${{ inputs.name }}/${version}"
+            docs/build "gs://${{ secrets.DOCS_TARGET_BUCKET }}/${{ inputs.name }}/${version}"
 
       - name: Upload latest documentation
         if: github.ref_name == steps.tags.outputs.latest
         run: >-
           gsutil -m rsync -r -d -j html,css,js -x "\.buildinfo|\.doctrees" \
-            docs/build "${{ secrets.DOCS_TARGET_BUCKET }}/${{ inputs.name }}/latest"
+            docs/build "gs://${{ secrets.DOCS_TARGET_BUCKET }}/${{ inputs.name }}/latest"
 
       - name: Invalidate CDN cache
         if: github.ref_name == steps.tags.outputs.latest
