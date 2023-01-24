@@ -8,6 +8,9 @@ workflows via the ``uses`` keyword:
     jobs:
       run-python-tests:
         uses: logikal-io/github-workflows/.github/workflows/run-python-tests.yml@v4
+        permissions:
+          contents: read
+          id-token: write
 
 You can find more information about reusable workflows in the `GitHub documentation
 <https://docs.github.com/en/actions/using-workflows/reusing-workflows>`_.
