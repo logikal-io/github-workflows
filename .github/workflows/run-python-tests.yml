@@ -16,6 +16,10 @@ on:
         description: The pytest command-line arguments to use
         type: string
         required: false
+      init-commands:
+        description: The init commands to run before executing pytest
+        type: string
+        required: false
       chrome-version:
         description: The Chrome and ChromeDriver version to install
         type: string
@@ -103,6 +107,10 @@ jobs:
           gcs-connector-version: ${{ inputs.hadoop-gcs-connector-version }}
           aws-module-version: ${{ inputs.hadoop-aws-module-version }}
           aws-java-sdk-version: ${{ inputs.aws-java-sdk-version }}
+
+      - name: Run init commands
+        if: inputs.init-commands != ''
+        run: ${{ init-commands }}
 
       - name: Run pytest
         run: orb --command 'pytest ${{ inputs.pytest-options }}'
