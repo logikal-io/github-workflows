@@ -12,6 +12,11 @@ on:
         type: string
         required: false
         default: requirements/dev.txt
+      fetch-depth:
+        description: Number of commits to fetch
+        type: string
+        required: false
+        default: 1
       pytest-options:
         description: The pytest command-line arguments to use
         type: string
@@ -68,6 +73,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: ${{ inputs.fetch-depth }}
 
       - name: Authenticate to Google Cloud Platform
         uses: google-github-actions/auth@v1
