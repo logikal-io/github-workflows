@@ -110,7 +110,7 @@ jobs:
 
       - name: Run init commands
         if: inputs.init-commands != ''
-        run: ${{ init-commands }}
+        run: ${{ inputs.init-commands }}
 
       - name: Run pytest
         run: orb --command 'pytest ${{ inputs.pytest-options }}'
