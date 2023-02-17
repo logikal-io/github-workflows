@@ -81,7 +81,7 @@ jobs:
       - name: Validate configuration
         env:
           TERRAGRUNT_USE_CREDENTIALS: false
-          CREDENTIALS_HOSTNAME: ${{ secrets.TERRAFORM_CREDENTIALS_HOSTNAME || "app.terraform.io" }}
+          CREDENTIALS_HOSTNAME: ${{ secrets.TERRAFORM_CREDENTIALS_HOSTNAME || 'app.terraform.io' }}
           CREDENTIALS_TOKEN: ${{ secrets.TERRAFORM_CREDENTIALS_TOKEN }}
         run: |-
           if [[ -n "${CREDENTIALS_TOKEN}" ]]; then
