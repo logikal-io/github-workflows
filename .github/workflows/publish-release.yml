@@ -128,6 +128,8 @@ jobs:
   package:
     name: Publish package
     runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -140,8 +142,6 @@ jobs:
       - name: Build package
         run: orb --command 'python -m build --sdist --wheel'
 
-      - name: Upload package
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: orb --command 'twine upload --non-interactive dist/*'
+      # Manual command: twine upload dist/*
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@release/v1
