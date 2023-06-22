@@ -1,0 +1,73 @@
+name: Publish static website
+on:
+  workflow_call:
+    inputs:
+      workload-identity-provider:
+        description: Full identifier of the GitHub workload identity pool provider in Google Cloud
+        type: string
+        required: true
+      uploader-service-account:
+        description: Email of the Google Cloud service account for uploading the website files
+        type: string
+        required: true
+      target-bucket:
+        description: The gsutil target bucket path to upload the static files to
+        type: string
+        required: true
+      website-service-url-map:
+        description: The website service URL map name to use for CDN cache invalidation
+        type: string
+        required: true
+      https-redirect-url-map:
+        description: The HTTP to HTTPS redirection URL map name to use for CDN cache invalidation
+        type: string
+        required: true
+      python-version:
+        description: The Python version to use
+        type: number
+        required: false
+        default: 3.8
+      requirements:
+        description: The requirements file to use for generating the static files.
+        type: string
+        required: false
+        default: requirements/core.txt
+
+jobs:
+  website:
+    name: Publish website
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: ${{ inputs.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ inputs.UPLOADER_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v1
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - uses: logikal-io/make-orb@v1
+        with:
+          requirements: ${{ inputs.requirements }}
+
+      - name: Generate static files
+        run: orb --command 'manage generate'
+
+      - name: Upload files
+        shell: bash
+        run: gsutil -m rsync -r -d -j html,css,js generated "gs://${{ inputs.TARGET_BUCKET }}/"
+
+      - name: Invalidate CDN cache
+        run: |-
+          gcloud compute url-maps invalidate-cdn-cache \
+            "${{ inputs.WEBSITE_SERVICE_URL_MAP }}" --path "/*"
+          gcloud compute url-maps invalidate-cdn-cache \
+            "${{ inputs.HTTPS_REDIRECT_URL_MAP }}" --path "/*"
