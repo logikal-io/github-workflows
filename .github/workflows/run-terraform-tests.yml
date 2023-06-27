@@ -47,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Terraform and Terragrunt
+      - name: Install Terraform
         uses: logikal-io/run-logikal-playbook@v1
         with:
           roles: terraform
@@ -58,7 +58,12 @@ jobs:
             "tflint_version": "${{ inputs.tflint-version }}",
           }'
 
+      - name: Install Terragrunt
+        working-directory: ${{ inputs.root-dir }}
+        run: tgenv install
+
       - name: Validate configuration
+        working-directory: ${{ inputs.root-dir }}
         env:
           TERRAGRUNT_USE_CREDENTIALS: false
           CREDENTIALS_HOSTNAME: ${{ secrets.TERRAFORM_CREDENTIALS_HOSTNAME || 'app.terraform.io' }}
@@ -68,6 +73,4 @@ jobs:
             hostname="$(echo "${CREDENTIALS_HOSTNAME}" | sed 's/\./_/g' | sed 's/-/__/g')"
             export "TF_TOKEN_${hostname}"="${CREDENTIALS_TOKEN}"
           fi
-          cd "${{ inputs.root-dir }}"
-          tgenv install
           terragrunt run-all validate --terragrunt-parallelism 1
