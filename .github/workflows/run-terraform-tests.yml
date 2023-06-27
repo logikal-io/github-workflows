@@ -69,4 +69,5 @@ jobs:
             export "TF_TOKEN_${hostname}"="${CREDENTIALS_TOKEN}"
           fi
           cd "${{ inputs.root-dir }}"
+          tgenv install
           terragrunt run-all validate --terragrunt-parallelism 1
