@@ -104,7 +104,7 @@ jobs:
 
       - name: Upload pytest artifacts
         uses: actions/upload-artifact@v3
-        if: failure() && inputs.upload_artifacts
+        if: failure() && inputs.upload-artifacts
         with:
           name: pytest-artifacts
           path: /tmp/pytest-of-runner/
