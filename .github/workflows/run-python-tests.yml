@@ -21,30 +21,15 @@ on:
         description: The pytest command-line arguments to use
         type: string
         required: false
-      init-commands:
-        description: The init commands to run before executing pytest
+      playbook-roles:
+        description: The Logikal playbook roles to run (comma-separated list)
         type: string
         required: false
-      chrome-version:
-        description: The Chrome and ChromeDriver version to install
+      playbook-vars:
+        description: The Logikal playbook variables to set (string-encoded JSON)
         type: string
         required: false
-      hadoop-version:
-        description: The Hadoop version to install
-        type: string
-        required: false
-      hadoop-gcs-connector-version:
-        description: The Hadoop Google Cloud Storage connector version to install
-        type: string
-        required: false
-      hadoop-aws-module-version:
-        description: The Hadoop AWS module version to install
-        type: string
-        required: false
-      aws-java-sdk-version:
-        description: The AWS Java SDK bundle version that was used to compile the Hadoop AWS module
-        type: string
-        required: false
+        default: '{}'
 
     secrets:
       GCP_TESTING_WORKLOAD_IDENTITY_PROVIDER:
@@ -102,22 +87,12 @@ jobs:
         with:
           requirements: ${{ inputs.requirements }}
 
-      - uses: logikal-io/install-chrome@v1
-        if: inputs.chrome-version != ''
+      - name: Run playbooks
+        uses: logikal-io/run-logikal-playbook@v1
+        if: inputs.playbook-roles != ''
         with:
-          version: ${{ inputs.chrome-version }}
-
-      - uses: logikal-io/install-hadoop@v1
-        if: inputs.hadoop-version != ''
-        with:
-          version: ${{ inputs.hadoop-version }}
-          gcs-connector-version: ${{ inputs.hadoop-gcs-connector-version }}
-          aws-module-version: ${{ inputs.hadoop-aws-module-version }}
-          aws-java-sdk-version: ${{ inputs.aws-java-sdk-version }}
-
-      - name: Run init commands
-        if: inputs.init-commands != ''
-        run: ${{ inputs.init-commands }}
+          roles: ${{ inputs.playbook-roles }}
+          vars: ${{ inputs.playbook-vars }}
 
       - name: Run pytest
         run: orb --command 'pytest ${{ inputs.pytest-options }}'
