@@ -21,22 +21,15 @@ on:
         type: string
         required: false
         default: requirements/build.txt
-      hadoop-version:
-        description: The Hadoop version to install
+      playbook-roles:
+        description: The Logikal playbook roles to run (comma-separated list)
         type: string
         required: false
-      hadoop-gcs-connector-version:
-        description: The Hadoop Google Cloud Storage connector version to install
+      playbook-vars:
+        description: The Logikal playbook variables to set (string-encoded JSON)
         type: string
         required: false
-      hadoop-aws-module-version:
-        description: The Hadoop AWS module version to install
-        type: string
-        required: false
-      aws-java-sdk-version:
-        description: The AWS Java SDK bundle version that was used to compile the Hadoop AWS module
-        type: string
-        required: false
+        default: '{}'
 
     secrets:
       PYPI_API_TOKEN:
@@ -79,17 +72,16 @@ jobs:
         with:
           python-version: ${{ inputs.python-version }}
 
+      - name: Run playbooks
+        uses: logikal-io/run-logikal-playbook@v1
+        if: inputs.playbook-roles != ''
+        with:
+          roles: ${{ inputs.playbook-roles }}
+          vars: ${{ inputs.playbook-vars }}
+
       - uses: logikal-io/make-orb@v1
         with:
           requirements: ${{ inputs.docs-requirements }}
-
-      - uses: logikal-io/install-hadoop@v1
-        if: inputs.hadoop-version != ''
-        with:
-          version: ${{ inputs.hadoop-version }}
-          gcs-connector-version: ${{ inputs.hadoop-gcs-connector-version }}
-          aws-module-version: ${{ inputs.hadoop-aws-module-version }}
-          aws-java-sdk-version: ${{ inputs.aws-java-sdk-version }}
 
       - name: Get latest tag
         id: tags
