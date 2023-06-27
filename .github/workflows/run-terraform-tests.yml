@@ -16,17 +16,17 @@ on:
         description: The version of tgenv to use
         type: string
         required: false
-        default: 1ccfddb22005b34eacaf06a9c33f58f14e816ec9  # commit 2022-10-01 / checked 2022-12-22
+        default: 1ccfddb22005b34eacaf06a9c33f58f14e816ec9  # commit 2022-10-01 / checked 2023-06-24
       tgenv-version:
         description: The version of tfenv to use
         type: string
         required: false
-        default: dd720f62051bb748f75eee2d83d6768171d45830  # commit 2020-04-18 / checked 2022-12-22
+        default: dd720f62051bb748f75eee2d83d6768171d45830  # commit 2020-04-18 / checked 2023-06-24
       tflint-version:
         description: The version of tflint to use
         type: string
         required: false
-        default: v0.43.0  # checked 2022-12-22
+        default: v0.47.0  # commit 2023-06-18 / checked 2023-06-24
 
     secrets:
       TERRAFORM_CREDENTIALS_HOSTNAME:
@@ -46,37 +46,17 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
+
       - name: Install Terraform and Terragrunt
-        run: |-
-          git config --global advice.detachedHead false
-
-          rm -rf /usr/local/bin/terraform
-
-          git clone https://github.com/tfutils/tfenv.git ~/tfenv
-          cd ~/tfenv
-          git checkout "${{ inputs.tfenv-version }}"
-          ln -s ~/tfenv/bin/* /usr/local/bin
-
-          git clone https://github.com/cunymatthieu/tgenv.git ~/tgenv
-          cd ~/tgenv
-          git checkout "${{ inputs.tgenv-version }}"
-          ln -s ~/tgenv/bin/* /usr/local/bin
-
-          git clone https://github.com/logikal-io/terragrunt-commons.git \
-            -b "${{ inputs.terragrunt-commons-version }}" ~/.terragrunt
-
-          cd "${{ github.workspace }}"
-          cd "${{ inputs.root-dir }}"
-          echo "Installing Terragrunt at '$(pwd)'"
-          tgenv install
-
-      - name: Install tflint
-        run: |-
-          download_url="https://github.com/terraform-linters/tflint/releases/download"
-          wget "${download_url}/${{ inputs.tflint-version }}/tflint_linux_amd64.zip" \
-            --progress=dot:giga -O ~/tflint.zip
-          unzip ~/tflint.zip -d /usr/local/bin
-          chmod +x /usr/local/bin/tflint
+        uses: logikal-io/run-logikal-playbook@v1
+        with:
+          roles: terraform
+          vars: '{
+            "tfenv_version": "${{ inputs.tfenv-version }}",
+            "tgenv_version": "${{ inputs.tgenv-version }}",
+            "terragrunt_commons_version": "${{ inputs.terragrunt-commons-version }}",
+            "tflint_version": "${{ inputs.tflint-version }}",
+          }'
 
       - name: Validate configuration
         env:
