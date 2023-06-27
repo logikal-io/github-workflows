@@ -83,16 +83,16 @@ jobs:
         with:
           python-version: ${{ inputs.python-version }}
 
-      - uses: logikal-io/make-orb@v1
-        with:
-          requirements: ${{ inputs.requirements }}
-
       - name: Run playbooks
         uses: logikal-io/run-logikal-playbook@v1
         if: inputs.playbook-roles != ''
         with:
           roles: ${{ inputs.playbook-roles }}
           vars: ${{ inputs.playbook-vars }}
+
+      - uses: logikal-io/make-orb@v1
+        with:
+          requirements: ${{ inputs.requirements }}
 
       - name: Run pytest
         run: orb --command 'pytest ${{ inputs.pytest-options }}'
