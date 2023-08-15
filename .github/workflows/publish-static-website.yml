@@ -33,6 +33,8 @@ on:
         required: false
         default: requirements/dev.txt
 
+concurrency: ${{ github.workflow }}-publish-${{ github.ref }}
+
 jobs:
   website:
     name: Publish website
