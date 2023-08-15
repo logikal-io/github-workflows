@@ -58,6 +58,9 @@ jobs:
         with:
           requirements: ${{ inputs.requirements }}
 
+      - name: Sync database
+        run: orb --command 'manage syncdb --no-input'
+
       - name: Generate static files
         run: orb --command 'manage generate --no-input'
 
