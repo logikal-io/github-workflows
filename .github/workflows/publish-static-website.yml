@@ -46,8 +46,8 @@ jobs:
           fetch-depth: 0
       - uses: google-github-actions/auth@v1
         with:
-          workload_identity_provider: ${{ inputs.WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ inputs.UPLOADER_SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ inputs.workload-identity-provider }}
+          service_account: ${{ inputs.uploader-service-account }}
       - uses: google-github-actions/setup-gcloud@v1
 
       - uses: actions/setup-python@v4
@@ -63,11 +63,11 @@ jobs:
 
       - name: Upload files
         shell: bash
-        run: gsutil -m rsync -r -d -j html,css,js generated "gs://${{ inputs.TARGET_BUCKET }}/"
+        run: gsutil -m rsync -r -d -j html,css,js generated "gs://${{ inputs.target-bucket }}/"
 
       - name: Invalidate CDN cache
         run: |-
           gcloud compute url-maps invalidate-cdn-cache \
-            "${{ inputs.WEBSITE_SERVICE_URL_MAP }}" --path "/*"
+            "${{ inputs.website-service-url-map }}" --path "/*"
           gcloud compute url-maps invalidate-cdn-cache \
-            "${{ inputs.HTTPS_REDIRECT_URL_MAP }}" --path "/*"
+            "${{ inputs.https-redirect-url-map }}" --path "/*"
