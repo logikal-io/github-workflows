@@ -59,7 +59,7 @@ jobs:
           requirements: ${{ inputs.requirements }}
 
       - name: Generate static files
-        run: orb --command 'manage generate'
+        run: orb --command 'manage generate --no-input'
 
       - name: Upload files
         shell: bash
