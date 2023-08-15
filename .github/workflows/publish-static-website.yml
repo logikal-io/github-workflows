@@ -31,7 +31,7 @@ on:
         description: The requirements file to use for generating the static files.
         type: string
         required: false
-        default: requirements/core.txt
+        default: requirements/dev.txt
 
 jobs:
   website:
