@@ -13,12 +13,12 @@ on:
         required: false
         default: v3
       tfenv-version:
-        description: The version of tgenv to use
+        description: The version of tfenv to use
         type: string
         required: false
         default: 1ccfddb22005b34eacaf06a9c33f58f14e816ec9  # commit 2022-10-01 / checked 2023-06-24
       tgenv-version:
-        description: The version of tfenv to use
+        description: The version of tgenv to use
         type: string
         required: false
         default: dc65a8cd6d13eb1f69b5a04a0ba6fe1c68cd0627  # commit 2023-04-28 / checked 2023-10-16
