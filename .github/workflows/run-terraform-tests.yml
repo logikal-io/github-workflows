@@ -21,7 +21,7 @@ on:
         description: The version of tfenv to use
         type: string
         required: false
-        default: dd720f62051bb748f75eee2d83d6768171d45830  # commit 2020-04-18 / checked 2023-06-24
+        default: dc65a8cd6d13eb1f69b5a04a0ba6fe1c68cd0627  # commit 2023-04-28 / checked 2023-10-16
       tflint-version:
         description: The version of tflint to use
         type: string
