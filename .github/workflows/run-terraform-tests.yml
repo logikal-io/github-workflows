@@ -16,17 +16,12 @@ on:
         description: The version of tfenv to use
         type: string
         required: false
-        default: 1ccfddb22005b34eacaf06a9c33f58f14e816ec9  # commit 2022-10-01 / checked 2023-06-24
+        default: 1ccfddb22005b34eacaf06a9c33f58f14e816ec9  # commit 2022-10-01 / checked 2023-11-28
       tgenv-version:
         description: The version of tgenv to use
         type: string
         required: false
-        default: dc65a8cd6d13eb1f69b5a04a0ba6fe1c68cd0627  # commit 2023-04-28 / checked 2023-10-16
-      tflint-version:
-        description: The version of tflint to use
-        type: string
-        required: false
-        default: v0.47.0  # commit 2023-06-18 / checked 2023-06-24
+        default: dc65a8cd6d13eb1f69b5a04a0ba6fe1c68cd0627  # commit 2023-04-28 / checked 2023-11-28
 
     secrets:
       TERRAFORM_CREDENTIALS_HOSTNAME:
@@ -55,7 +50,6 @@ jobs:
             "tfenv_version": "${{ inputs.tfenv-version }}",
             "tgenv_version": "${{ inputs.tgenv-version }}",
             "terragrunt_commons_version": "${{ inputs.terragrunt-commons-version }}",
-            "tflint_version": "${{ inputs.tflint-version }}",
           }'
 
       - name: Install Terragrunt
