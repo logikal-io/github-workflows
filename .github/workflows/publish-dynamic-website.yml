@@ -1,0 +1,74 @@
+name: Publish dynamic website
+on:
+  workflow_call:
+    inputs:
+      workload-identity-provider:
+        description: Full identifier of the GitHub workload identity pool provider in Google Cloud
+        type: string
+        required: true
+      publisher-service-account:
+        description: Email of the Google Cloud service account for publishing the website
+        type: string
+        required: true
+      image-repository:
+        description: The GCP Artifact Registry repository to use
+        type: string
+        required: true
+      image-name:
+        description: The name of the image
+        type: string
+        required: true
+      image-path:
+        description: The path to the folder containing the relevant Dockerfile
+        type: string
+        required: false
+        default: .
+      gcp-region:
+        description: The GCP region to use
+        type: string
+        required: true
+
+jobs:
+  website:
+    name: Publish website
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Authenticate to Google Cloud Platform
+        uses: google-github-actions/auth@v1
+        id: gcp
+        with:
+          workload_identity_provider: ${{ inputs.workload-identity-provider }}
+          service_account: ${{ inputs.publisher-service-account }}
+
+      - name: Build and push image
+        env:
+          name: ${{ inputs.name }}:${{ github.sha }}
+          registry: ${{ inputs.gcp-region }}-docker.pkg.dev
+          registry_path: ${{ steps.gcp.outputs.project_id }}/${{ inputs.image-repository }}
+        id: image
+        run: |-
+          gcloud auth configure-docker --quiet marketplace.gcr.io
+          gcloud auth configure-docker --quiet "${registry}"
+          image_url="${registry}/${registry_path}/${name}"
+          echo "image_url=${image_url}" >> $GITHUB_OUTPUT
+          docker build --tag "${image_url}" "${{ inputs.path }}"
+          docker push "${image_url}"
+
+      - name: Apply migrations
+        run: >-
+          gcloud run jobs execute "${{ inputs.name }}-migrate"
+            --region "${{ inputs.gcp-region }}"
+            --wait
+
+      - name: Update service
+        run: >-
+          gcloud run deploy "${{ inputs.name }}"
+            --revision-suffix "${{ github.sha }}"
+            --image "${{ steps.image.outputs.image_url }}"
