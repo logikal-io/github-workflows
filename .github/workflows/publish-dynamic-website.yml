@@ -73,5 +73,6 @@ jobs:
       - name: Update service
         run: >-
           gcloud run deploy "${{ inputs.image-name }}" \
+            --region "${{ inputs.gcp-region }}" \
             --revision-suffix "${{ github.sha }}" \
             --image "${{ steps.image.outputs.image_url }}"
