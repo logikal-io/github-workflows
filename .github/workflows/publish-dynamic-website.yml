@@ -66,13 +66,12 @@ jobs:
           gcloud run jobs update "${{ inputs.image-name }}-migrate" \
             --region "${{ inputs.gcp-region }}" \
             --image "${{ steps.image.outputs.image_url }}"
-          sleep 5s
           gcloud run jobs execute "${{ inputs.image-name }}-migrate" \
             --region "${{ inputs.gcp-region }}" \
             --wait
 
       - name: Update service
         run: >-
-          gcloud run deploy "${{ inputs.name }}" \
+          gcloud run deploy "${{ inputs.image-name }}" \
             --revision-suffix "${{ github.sha }}" \
             --image "${{ steps.image.outputs.image_url }}"
