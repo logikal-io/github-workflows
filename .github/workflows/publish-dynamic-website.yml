@@ -63,7 +63,7 @@ jobs:
 
       - name: Apply migrations
         run: >-
-          gcloud run jobs execute "${{ inputs.name }}-migrate"
+          gcloud run jobs execute "${{ inputs.image-name }}-migrate"
             --region "${{ inputs.gcp-region }}"
             --wait
 
