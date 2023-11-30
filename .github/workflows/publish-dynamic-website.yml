@@ -58,7 +58,7 @@ jobs:
           gcloud auth configure-docker --quiet "${registry}"
           image_url="${registry}/${registry_path}/${name}"
           echo "image_url=${image_url}" >> $GITHUB_OUTPUT
-          docker build --tag "${image_url}" "${{ inputs.path }}"
+          docker build --tag "${image_url}" "${{ inputs.image-path }}"
           docker push "${image_url}"
 
       - name: Apply migrations
