@@ -49,7 +49,7 @@ jobs:
 
       - name: Build and push image
         env:
-          name: ${{ inputs.name }}:${{ github.sha }}
+          name: ${{ inputs.image-name }}:${{ github.sha }}
           registry: ${{ inputs.gcp-region }}-docker.pkg.dev
           registry_path: ${{ steps.gcp.outputs.project_id }}/${{ inputs.image-repository }}
         id: image
