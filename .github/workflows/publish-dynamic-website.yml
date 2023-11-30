@@ -62,7 +62,9 @@ jobs:
           docker push "${image_url}"
 
       - name: Apply migrations
-        run: >-
+        run: |-
+          gcloud run jobs update "${{ inputs.image-name }}-migrate" \
+            --image "${{ steps.image.outputs.image_url }}"
           gcloud run jobs execute "${{ inputs.image-name }}-migrate" \
             --region "${{ inputs.gcp-region }}" \
             --wait
