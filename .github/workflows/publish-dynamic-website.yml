@@ -63,16 +63,16 @@ jobs:
 
       - name: Apply migrations
         run: |-
-          gcloud run jobs update "${{ inputs.image-name }}-migrate" \
+          gcloud run jobs update "${{ inputs.image-name }}-website-migrate" \
             --region "${{ inputs.gcp-region }}" \
             --image "${{ steps.image.outputs.image_url }}"
-          gcloud run jobs execute "${{ inputs.image-name }}-migrate" \
+          gcloud run jobs execute "${{ inputs.image-name }}-website-migrate" \
             --region "${{ inputs.gcp-region }}" \
             --wait
 
       - name: Update service
         run: >-
-          gcloud run deploy "${{ inputs.image-name }}" \
+          gcloud run deploy "${{ inputs.image-name }}-website" \
             --region "${{ inputs.gcp-region }}" \
             --revision-suffix "${{ github.sha }}" \
             --image "${{ steps.image.outputs.image_url }}"
