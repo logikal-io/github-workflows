@@ -1,0 +1,9 @@
+name: Update floating tag
+on:
+  release:
+    types: [released]
+
+jobs:
+  update-floating-tag:
+    name: Update floating tag
+    uses: ./.github/workflows/update-floating-tag.yml
