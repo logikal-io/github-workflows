@@ -18,7 +18,7 @@ jobs:
 
       - name: Update tag
         run: |-
-          echo "Version: ${GITHUB_REF_NAME}"
+          echo "Current version: ${GITHUB_REF_NAME}"
           major_version=$(echo ${GITHUB_REF_NAME} | grep -o '^v[0-9]*')
           echo "Major version: ${major_version}"
           latest_version=$( \
@@ -30,6 +30,6 @@ jobs:
             exit 1
           fi
 
-          echo "Setting tag ${major_version} to ${latest_version}"
+          echo "Setting tag '${major_version}' to '${latest_version}'"
           git tag --force "${major_version}" "${latest_version}"
           git push --force --tags
