@@ -18,7 +18,10 @@ jobs:
 
       - name: Update tag
         run: |-
-          major_version=$(echo $GITHUB_REF | grep -o '^v[0-9]*')
+          echo "Reference: ${GITHUB_REF}"
+          echo "Reference name: ${GITHUB_REF_NAME}"
+
+          major_version=$(echo ${GITHUB_REF} | grep -o '^v[0-9]*')
           echo "Major version: ${major_version}"
           latest_version=$( \
             git tag --list --sort=version:refname | grep "^${major_version}\." | tail -n 1 \
