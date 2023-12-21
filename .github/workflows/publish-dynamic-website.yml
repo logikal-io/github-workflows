@@ -28,6 +28,8 @@ on:
         type: string
         required: true
 
+concurrency: ${{ github.workflow }}-publish-${{ github.ref }}
+
 jobs:
   website:
     name: Publish website

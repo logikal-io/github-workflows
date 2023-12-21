@@ -1,0 +1,27 @@
+name: Update floating tag
+on:
+  workflow_call:
+
+concurrency: ${{ github.workflow }}-publish-${{ github.ref }}
+
+jobs:
+  update-tag:
+    name: Update tag
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Update tag
+        run: |-
+          major_version=$(echo $GITHUB_REF | grep -o '^v[0-9]*')
+          all_versions=$(git tag -l --sort=version:refname | grep "^${major_version}\.")
+          latest_version=$(echo ${all_versions} | tail -n 1)
+
+          if [[ ! ${latest_version} ]]; then
+            echo "Invalid tag"
+            exit 1
+          fi
+
+          echo "Setting tag ${major_version} to ${latest_version}"
+          git tag --force "${major_version}" "${latest_version}"
+          git push --force --tags
