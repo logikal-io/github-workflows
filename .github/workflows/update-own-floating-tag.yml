@@ -7,3 +7,5 @@ jobs:
   update-floating-tag:
     name: Update floating tag
     uses: ./.github/workflows/update-floating-tag.yml
+    permissions:
+      contents: write
