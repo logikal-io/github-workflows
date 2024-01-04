@@ -1,0 +1,51 @@
+name: Run dynamic website command
+on:
+  workflow_call:
+    inputs:
+      workload-identity-provider:
+        description: Full identifier of the GitHub workload identity pool provider in Google Cloud
+        type: string
+        required: true
+      service-account:
+        description: Email of the Google Cloud service account for running the maintenance
+        type: string
+        required: true
+      image-name:
+        description: The name of the image
+        type: string
+        required: true
+      gcp-region:
+        description: The GCP region to use
+        type: string
+        required: true
+      command:
+        description: The command to run
+        type: string
+        required: true
+
+concurrency: ${{ github.workflow }}-publish-${{ github.ref }}
+
+jobs:
+  run-command:
+    name: Run command
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Authenticate to Google Cloud Platform
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ inputs.workload-identity-provider }}
+          service_account: ${{ inputs.publisher-service-account }}
+
+      - name: Run command
+        run: |-
+          gcloud run jobs execute "${{ inputs.image-name }}-website-command" \
+            --args '${{ inputs.command }}' \
+            --region "${{ inputs.gcp-region }}" \
+            --wait

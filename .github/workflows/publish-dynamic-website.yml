@@ -38,12 +38,12 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Authenticate to Google Cloud Platform
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v2
         id: gcp
         with:
           workload_identity_provider: ${{ inputs.workload-identity-provider }}
@@ -65,10 +65,11 @@ jobs:
 
       - name: Apply migrations
         run: |-
-          gcloud run jobs update "${{ inputs.image-name }}-website-migrate" \
+          gcloud run jobs update "${{ inputs.image-name }}-website-command" \
             --region "${{ inputs.gcp-region }}" \
             --image "${{ steps.image.outputs.image_url }}"
-          gcloud run jobs execute "${{ inputs.image-name }}-website-migrate" \
+          gcloud run jobs execute "${{ inputs.image-name }}-website-command" \
+            --args 'manage migrate' \
             --region "${{ inputs.gcp-region }}" \
             --wait
 
