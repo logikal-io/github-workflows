@@ -62,12 +62,12 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: ${{ inputs.fetch-depth }}
 
       - name: Authenticate to Google Cloud Platform
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v2
         env:
           RUN_STEP: ${{ secrets.GCP_TESTING_SERVICE_ACCOUNT != '' }}
         if: env.RUN_STEP == 'true'
@@ -76,7 +76,7 @@ jobs:
           service_account: ${{ secrets.GCP_TESTING_SERVICE_ACCOUNT }}
 
       - name: Authenticate to Amazon Web Services
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         env:
           RUN_STEP: ${{ secrets.AWS_TESTING_ROLE != '' }}
         if: env.RUN_STEP == 'true'
@@ -84,7 +84,7 @@ jobs:
           aws-region: ${{ secrets.AWS_TESTING_REGION }}
           role-to-assume: ${{ secrets.AWS_TESTING_ROLE }}
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ inputs.python-version }}
 
@@ -103,7 +103,7 @@ jobs:
         run: orb --command 'pytest ${{ inputs.pytest-options }}'
 
       - name: Upload pytest artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure() && inputs.upload-artifacts
         with:
           name: pytest-artifacts
