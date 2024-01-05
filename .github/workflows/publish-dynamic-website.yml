@@ -77,5 +77,4 @@ jobs:
         run: >-
           gcloud run deploy "${{ inputs.image-name }}-website" \
             --region "${{ inputs.gcp-region }}" \
-            --revision-suffix "${{ github.sha }}" \
             --image "${{ steps.image.outputs.image_url }}"
