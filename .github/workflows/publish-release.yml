@@ -97,7 +97,7 @@ jobs:
         run: |-
           version="${tag:1}"
           if [[ ! ${version} ]]; then
-            echo "Invalid tag"
+            echo 'Invalid tag'
             exit 1
           fi
           gsutil -m rsync -r -d -j html,css,js -x "\.buildinfo|\.doctrees" \
