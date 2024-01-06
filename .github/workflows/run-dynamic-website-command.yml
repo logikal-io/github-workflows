@@ -42,12 +42,11 @@ jobs:
         id: gcp
         with:
           workload_identity_provider: ${{ inputs.workload-identity-provider }}
-          service_account: ${{ inputs.publisher-service-account }}
+          service_account: ${{ inputs.service-account }}
 
       - name: Run command
         run: |-
           gcloud run jobs execute "${{ inputs.image-name }}-website-command" \
-            --project '${{ steps.gcp.outputs.project_id }}' \
             --region "${{ inputs.gcp-region }}" \
             --args '${{ inputs.command }}' \
             --wait

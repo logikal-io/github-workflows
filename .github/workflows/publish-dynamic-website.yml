@@ -66,11 +66,9 @@ jobs:
       - name: Apply migrations
         run: |-
           gcloud run jobs update "${{ inputs.image-name }}-website-command" \
-            --project '${{ steps.gcp.outputs.project_id }}' \
             --region "${{ inputs.gcp-region }}" \
             --image "${{ steps.image.outputs.image_url }}"
           gcloud run jobs execute "${{ inputs.image-name }}-website-command" \
-            --project '${{ steps.gcp.outputs.project_id }}' \
             --region "${{ inputs.gcp-region }}" \
             --args 'manage migrate' \
             --wait
@@ -78,6 +76,5 @@ jobs:
       - name: Update service
         run: >-
           gcloud run deploy "${{ inputs.image-name }}-website" \
-            --project '${{ steps.gcp.outputs.project_id }}' \
             --region "${{ inputs.gcp-region }}" \
             --image "${{ steps.image.outputs.image_url }}"
