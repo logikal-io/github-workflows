@@ -39,6 +39,7 @@ jobs:
 
       - name: Authenticate to Google Cloud Platform
         uses: google-github-actions/auth@v2
+        id: gcp
         with:
           workload_identity_provider: ${{ inputs.workload-identity-provider }}
           service_account: ${{ inputs.publisher-service-account }}
@@ -46,6 +47,7 @@ jobs:
       - name: Run command
         run: |-
           gcloud run jobs execute "${{ inputs.image-name }}-website-command" \
-            --args '${{ inputs.command }}' \
+            --project '${{ steps.gcp.outputs.project_id }}' \
             --region "${{ inputs.gcp-region }}" \
+            --args '${{ inputs.command }}' \
             --wait
