@@ -1,0 +1,54 @@
+name: Upload to AWS S3
+on:
+  workflow_call:
+    inputs:
+      uploader-role:
+        description: The ARN of the AWS role used for uploading
+        type: string
+        required: true
+      region:
+        description: The AWS region to use for authorization
+        required: false
+      bucket:
+        description: The name of the target bucket
+        type: string
+        required: true
+      path:
+        description: The path to upload
+        type: string
+        required: false
+        default: .
+      reference:
+        description: The git branch, tag or SHA to checkout
+        type: string
+        required: false
+      fetch-depth:
+        description: Number of commits to fetch
+        type: string
+        required: false
+        default: 1
+
+concurrency: ${{ github.workflow }}-publish-${{ github.ref }}
+
+jobs:
+  upload:
+    name: Upload to AWS S3
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: ${{ inputs.fetch-depth }}
+          ref: ${{ inputs.reference }}
+
+      - name: Authenticate to Amazon Web Services
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ inputs.region }}
+          role-to-assume: ${{ inputs.uploader-role }}
+
+      - name: Upload files
+        shell: bash
+        run: aws s3 sync --delete "${{ inputs.path }}" "s3://${{ inputs.bucket }}"
