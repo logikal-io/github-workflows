@@ -89,7 +89,7 @@ jobs:
           python-version: ${{ inputs.python-version }}
 
       - name: Run playbooks
-        uses: logikal-io/run-logikal-playbook@v1
+        uses: logikal-io/run-logikal-playbook@v2
         if: inputs.playbook-roles != ''
         with:
           roles: ${{ inputs.playbook-roles }}
