@@ -6,10 +6,16 @@ on:
         description: The name of the image
         type: string
         required: true
-      path:
-        description: The path to the folder containing the relevant Dockerfile
+      dockerfile:
+        description: The path to the relevant Dockerfile
         type: string
-        required: true
+        required: false
+        default: Dockerfile
+      build-path:
+        description: The build path to use
+        type: string
+        required: false
+        default: .
       aws-role-to-assume:
         description: The AWS role to assume
         type: string
@@ -46,5 +52,5 @@ jobs:
               docker login --username AWS --password-stdin public.ecr.aws
           aws ecr get-login-password --region "${{ inputs.aws-region }}" | \
               docker login --username AWS --password-stdin "${registry}"
-          docker build --tag "${registry}/${name}" "${{ inputs.path }}"
+          docker build --tag "${registry}/${name}" --file "${{ inputs.dockerfile }}" "${{ inputs.build-path }}"
           docker push "${registry}/${name}"
