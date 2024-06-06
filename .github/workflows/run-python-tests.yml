@@ -95,6 +95,12 @@ jobs:
           roles: ${{ inputs.playbook-roles }}
           vars: ${{ inputs.playbook-vars }}
 
+      - name: Authenticate Docker
+        env:
+          RUN_STEP: ${{ secrets.GCP_TESTING_SERVICE_ACCOUNT != '' }}
+        if: env.RUN_STEP == 'true'
+        run: gcloud auth configure-docker --quiet marketplace.gcr.io
+
       - uses: logikal-io/make-orb@v1
         with:
           requirements: ${{ inputs.requirements }}
