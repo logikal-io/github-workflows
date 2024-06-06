@@ -71,7 +71,7 @@ jobs:
       - name: Authenticate to Google Cloud Platform
         uses: google-github-actions/auth@v2
         env:
-          RUN_STEP: ${{ inputs.gcp-testing-service-account }}
+          RUN_STEP: ${{ inputs.gcp-testing-service-account != '' }}
         if: env.RUN_STEP == 'true'
         with:
           workload_identity_provider: ${{ inputs.gcp-testing-workload-identity-provider }}
@@ -99,7 +99,7 @@ jobs:
 
       - name: Authenticate Docker
         env:
-          RUN_STEP: ${{ inputs.gcp-testing-service-account }}
+          RUN_STEP: ${{ inputs.gcp-testing-service-account != '' }}
         if: env.RUN_STEP == 'true'
         run: gcloud auth configure-docker --quiet marketplace.gcr.io
 
