@@ -35,19 +35,21 @@ on:
         type: boolean
         required: false
         default: true
-
-    secrets:
-      GCP_TESTING_WORKLOAD_IDENTITY_PROVIDER:
+      gcp-testing-workload-identity-provider:
         description: Full identifier of the GitHub workload identity pool provider in Google Cloud
+        type: string
         required: false
-      GCP_TESTING_SERVICE_ACCOUNT:
+      gcp-testing-service-account:
         description: Email of the Google Cloud service account used for running tests
+        type: string
         required: false
-      AWS_TESTING_ROLE:
+      aws-testing-role:
         description: The ARN of the AWS role used for running tests
+        type: string
         required: false
-      AWS_TESTING_REGION:
+      aws-testing-region:
         description: The AWS region to use for authorization
+        type: string
         required: false
 
 concurrency:
@@ -69,20 +71,20 @@ jobs:
       - name: Authenticate to Google Cloud Platform
         uses: google-github-actions/auth@v2
         env:
-          RUN_STEP: ${{ secrets.GCP_TESTING_SERVICE_ACCOUNT != '' }}
+          RUN_STEP: ${{ inputs.gcp-testing-service-account }}
         if: env.RUN_STEP == 'true'
         with:
-          workload_identity_provider: ${{ secrets.GCP_TESTING_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_TESTING_SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ inputs.gcp-testing-workload-identity-provider }}
+          service_account: ${{ inputs.gcp-testing-service-account }}
 
       - name: Authenticate to Amazon Web Services
         uses: aws-actions/configure-aws-credentials@v4
         env:
-          RUN_STEP: ${{ secrets.AWS_TESTING_ROLE != '' }}
+          RUN_STEP: ${{ inputs.aws-testing-role != '' }}
         if: env.RUN_STEP == 'true'
         with:
-          aws-region: ${{ secrets.AWS_TESTING_REGION }}
-          role-to-assume: ${{ secrets.AWS_TESTING_ROLE }}
+          aws-region: ${{ inputs.aws-testing-region }}
+          role-to-assume: ${{ inputs.aws-testing-role }}
 
       - uses: actions/setup-python@v5
         with:
@@ -97,7 +99,7 @@ jobs:
 
       - name: Authenticate Docker
         env:
-          RUN_STEP: ${{ secrets.GCP_TESTING_SERVICE_ACCOUNT != '' }}
+          RUN_STEP: ${{ inputs.gcp-testing-service-account }}
         if: env.RUN_STEP == 'true'
         run: gcloud auth configure-docker --quiet marketplace.gcr.io
 

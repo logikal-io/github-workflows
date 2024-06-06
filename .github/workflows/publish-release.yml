@@ -30,25 +30,30 @@ on:
         type: string
         required: false
         default: '{}'
+      docs-workload-identity-provider:
+        description: Full identifier of the GitHub workload identity pool provider in Google Cloud
+        type: string
+        required: true
+      docs-uploader-service-account:
+        description: Email of the Google Cloud service account for uploading documentation files
+        type: string
+        required: true
+      docs-target-bucket:
+        description: The gsutil target bucket path to upload the documentation to
+        type: string
+        required: true
+      docs-website-service-url-map:
+        description: The website service URL map name to use for CDN cache invalidation
+        type: string
+        required: true
+      docs-https-redirect-url-map:
+        description: The HTTP to HTTPS redirection URL map name to use for CDN cache invalidation
+        type: string
+        required: true
 
     secrets:
       PYPI_API_TOKEN:
         description: The PyPI access token to use for uploading the package
-        required: true
-      DOCS_WORKLOAD_IDENTITY_PROVIDER:
-        description: Full identifier of the GitHub workload identity pool provider in Google Cloud
-        required: true
-      DOCS_UPLOADER_SERVICE_ACCOUNT:
-        description: Email of the Google Cloud service account for uploading documentation files
-        required: true
-      DOCS_TARGET_BUCKET:
-        description: The gsutil target bucket path to upload the documentation to
-        required: true
-      DOCS_WEBSITE_SERVICE_URL_MAP:
-        description: The website service URL map name to use for CDN cache invalidation
-        required: true
-      DOCS_HTTPS_REDIRECT_URL_MAP:
-        description: The HTTP to HTTPS redirection URL map name to use for CDN cache invalidation
         required: true
 
 jobs:
@@ -64,8 +69,8 @@ jobs:
           fetch-depth: 0
       - uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ secrets.DOCS_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.DOCS_UPLOADER_SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ inputs.docs-workload-identity-provider }}
+          service_account: ${{ inputs.docs-uploader-service-account }}
       - uses: google-github-actions/setup-gcloud@v1
 
       - uses: actions/setup-python@v4
@@ -101,21 +106,21 @@ jobs:
             exit 1
           fi
           gsutil -m rsync -r -d -j html,css,js -x "\.buildinfo|\.doctrees" \
-            docs/build "gs://${{ secrets.DOCS_TARGET_BUCKET }}/${{ inputs.name }}/${version}"
+            docs/build "gs://${{ inputs.docs-target-bucket }}/${{ inputs.name }}/${version}"
 
       - name: Upload latest documentation
         if: github.ref_name == steps.tags.outputs.latest
         run: >-
           gsutil -m rsync -r -d -j html,css,js -x "\.buildinfo|\.doctrees" \
-            docs/build "gs://${{ secrets.DOCS_TARGET_BUCKET }}/${{ inputs.name }}/latest"
+            docs/build "gs://${{ inputs.docs-target-bucket }}/${{ inputs.name }}/latest"
 
       - name: Invalidate CDN cache
         if: github.ref_name == steps.tags.outputs.latest
         run: |-
           gcloud compute url-maps invalidate-cdn-cache \
-            "${{ secrets.DOCS_WEBSITE_SERVICE_URL_MAP }}" --path "/${{ inputs.name }}/latest/*"
+            "${{ inputs.docs-website-service-url-map }}" --path "/${{ inputs.name }}/latest/*"
           gcloud compute url-maps invalidate-cdn-cache \
-            "${{ secrets.DOCS_HTTPS_REDIRECT_URL_MAP }}" --path "/${{ inputs.name }}/latest/*"
+            "${{ inputs.docs-https-redirect-url-map }}" --path "/${{ inputs.name }}/latest/*"
 
   package:
     name: Publish package
