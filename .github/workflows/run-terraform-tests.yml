@@ -16,12 +16,12 @@ on:
         description: The version of tfenv to use
         type: string
         required: false
-        default: 1ccfddb22005b34eacaf06a9c33f58f14e816ec9  # commit 2022-10-01 / checked 2023-11-28
+        default: 39d8c27ad9862ffdec57989b66fd2720cb72e76c  # commit 2023-12-19 / checked 2024-10-25
       tgenv-version:
         description: The version of tgenv to use
         type: string
         required: false
-        default: dc65a8cd6d13eb1f69b5a04a0ba6fe1c68cd0627  # commit 2023-04-28 / checked 2023-11-28
+        default: 8f87cb3bd76063d6adef2413ce0a399f773f2319  # commit 2024-06-14 / checked 2024-10-25
 
     secrets:
       TERRAFORM_CREDENTIALS_HOSTNAME:
@@ -38,12 +38,12 @@ concurrency:
 jobs:
   run-tests:
     name: Run tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Terraform
-        uses: logikal-io/run-logikal-playbook@v1
+        uses: logikal-io/run-logikal-playbook@v2
         with:
           roles: terraform
           vars: '{
