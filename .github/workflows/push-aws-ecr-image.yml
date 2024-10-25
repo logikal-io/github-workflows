@@ -28,7 +28,7 @@ on:
 jobs:
   push-image:
     name: Push image
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       id-token: write
@@ -52,5 +52,6 @@ jobs:
               docker login --username AWS --password-stdin public.ecr.aws
           aws ecr get-login-password --region "${{ inputs.aws-region }}" | \
               docker login --username AWS --password-stdin "${registry}"
-          docker build --tag "${registry}/${name}" --file "${{ inputs.dockerfile }}" "${{ inputs.build-path }}"
+          docker build --tag "${registry}/${name}" --file "${{ inputs.dockerfile }}" \
+              "${{ inputs.build-path }}"
           docker push "${registry}/${name}"

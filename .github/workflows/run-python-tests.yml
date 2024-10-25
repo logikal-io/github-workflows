@@ -6,7 +6,7 @@ on:
         description: The Python version to use
         type: number
         required: false
-        default: 3.8
+        default: 3.12
       requirements:
         description: The path to the requirements file
         type: string
@@ -59,7 +59,7 @@ concurrency:
 jobs:
   run-tests:
     name: Run tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       id-token: write
