@@ -97,6 +97,11 @@ jobs:
           roles: ${{ inputs.playbook-roles }}
           vars: ${{ inputs.playbook-vars }}
 
+      - uses: google-github-actions/setup-gcloud@v2
+        env:
+          RUN_STEP: ${{ inputs.gcp-testing-service-account != '' }}
+        if: env.RUN_STEP == 'true'
+
       - name: Authenticate Docker
         env:
           RUN_STEP: ${{ inputs.gcp-testing-service-account != '' }}
