@@ -108,7 +108,10 @@ jobs:
           requirements: ${{ inputs.requirements }}
 
       - name: Run pytest
-        run: orb --command 'pytest ${{ inputs.pytest-options }}'
+        run: |
+          systemctl is-active --quiet apparmor.service && systemctl stop apparmor.service
+          systemctl disable apparmor.service
+          orb --command 'pytest ${{ inputs.pytest-options }}'
 
       - name: Upload pytest artifacts
         uses: actions/upload-artifact@v4
