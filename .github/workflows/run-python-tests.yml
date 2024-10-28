@@ -111,6 +111,9 @@ jobs:
         run: |
           sudo systemctl stop apparmor.service
           sudo systemctl disable apparmor.service
+          cd ~/.cache/pytest_logikal/chrome/130.0.6723.69/
+          ./chrome
+          cd -
           orb --command 'pytest ${{ inputs.pytest-options }}'
 
       - name: Upload pytest artifacts
