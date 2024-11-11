@@ -8,7 +8,7 @@ on:
         required: false
         default: 3.12
       runs-on:
-        description: Te runner to use
+        description: The runner to use
         type: string
         required: false
         default: ubuntu-24.04
