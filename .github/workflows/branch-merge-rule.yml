@@ -28,7 +28,7 @@ jobs:
           allowed_from: ${{ inputs.allowed-branch-from }}
           allowed_to: ${{ inputs.allowed-branch-to }}
         run: |
-          if [["${branch_from}" == "${allowed_from}" && "${branch_to}" == "${allowed_to}"]]; then
+          if [[ "${branch_from}" == "${allowed_from}" && "${branch_to}" == "${allowed_to}" ]]; then
             echo 'Branch merge rule check succeeded'
           else
             echo "Error: Only '${allowed_from}' can be merged into '${allowed_to}'"
