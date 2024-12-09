@@ -1,4 +1,4 @@
-nam: Branch merge rule check
+name: Branch merge rule check
 on:
   workflow_call:
     inputs:
