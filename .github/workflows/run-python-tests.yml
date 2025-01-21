@@ -126,7 +126,7 @@ jobs:
           abi <abi/4.0>,
           include <tunables/global>
 
-          profile chrome-dev /@{HOME}/.cache/pytest_logikal/chrome/**/chrome flags=(unconfined) {
+          profile chrome-dev /@{HOME}/.cache/logikal_browser/chrome/**/chrome flags=(unconfined) {
             userns,
 
             include if exists <local/chrome>
@@ -138,7 +138,7 @@ jobs:
           abi <abi/4.0>,
           include <tunables/global>
 
-          profile edge-dev /@{HOME}/.cache/pytest_logikal/edge/**/msedge flags=(unconfined) {
+          profile edge-dev /@{HOME}/.cache/logikal_browser/edge/**/msedge flags=(unconfined) {
             userns,
 
             include if exists <local/msedge>
