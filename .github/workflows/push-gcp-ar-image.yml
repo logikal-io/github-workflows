@@ -50,7 +50,7 @@ jobs:
         id: gcp
         with:
           workload_identity_provider: ${{ inputs.workload-identity-provider }}
-          service_account: ${{ inputs.publisher-service-account }}
+          service_account: ${{ inputs.service-account }}
 
       - name: Install gcloud CLI
         uses: google-github-actions/setup-gcloud@v2
