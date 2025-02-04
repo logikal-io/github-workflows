@@ -52,7 +52,11 @@ jobs:
             "terragrunt_commons_version": "${{ inputs.terragrunt-commons-version }}",
           }'
 
-      - name: Install Terragrunt
+      - name: Install Terraform binary
+        working-directory: ${{ inputs.root-dir }}
+        run: tfenv install
+
+      - name: Install Terragrunt binary
         working-directory: ${{ inputs.root-dir }}
         run: tgenv install
 
