@@ -32,6 +32,10 @@ on:
         description: The GCP region to use
         type: string
         required: true
+      update-cloud-run-job:
+        description: The name of the Google Cloud Run job to update to use the newly built image
+        type: string
+        required: false
 
 jobs:
   push-image:
@@ -69,3 +73,10 @@ jobs:
           docker build --tag "${image_url}" --file "${{ inputs.dockerfile }}" \
             "${{ inputs.build-path }}"
           docker push "${image_url}"
+
+      - name: Update Cloud Run job
+        if: inputs.update-cloud-run-job != ''
+        run: |-
+          gcloud run jobs update "${{ inputs.update-cloud-run-job }}" \
+            --region "${{ inputs.gcp-region }}" \
+            --image "${{ steps.image.outputs.image_url }}"
