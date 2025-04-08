@@ -54,7 +54,7 @@ on:
 jobs:
   documentation:
     name: Publish documentation
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       id-token: write
@@ -119,7 +119,7 @@ jobs:
 
   package:
     name: Publish package
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
