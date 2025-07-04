@@ -5,21 +5,16 @@ on:
       allowed-branch-from:
         description: The source branch to use
         type: string
+        required: false
+        default: ''
       allowed-branch-to:
         description: The target branch to use
         type: string
-        required: false
-        default: main
-      runs-on:
-        description: The runner to use
-        type: string
-        required: false
-        default: ubuntu-24.04
 
 jobs:
   check-branch:
     name: Check branch
-    runs-on: ${{ inputs.runs-on }}
+    runs-on: ubuntu-24.04
     steps:
       - name: Check branch
         env:
@@ -28,9 +23,16 @@ jobs:
           allowed_from: ${{ inputs.allowed-branch-from }}
           allowed_to: ${{ inputs.allowed-branch-to }}
         run: |
-          if [[ "${branch_from}" == "${allowed_from}" && "${branch_to}" == "${allowed_to}" ]]; then
-            echo 'Branch merge rule check succeeded'
+          if [[ "${allowed_from}" == "" ]]; then
+            if [[ "${branch_to}" != "${allowed_to}" ]]; then
+              echo "Error: You can only merge into the '${allowed_to}' branch"
+              exit 1
+            fi
           else
-            echo "Error: Only '${allowed_from}' can be merged into '${allowed_to}'"
-            exit 1
+            if [[ "${branch_from}" != "${allowed_from}" || "${branch_to}" != "${allowed_to}" ]]
+            then
+              echo "Error: Only '${allowed_from}' can be merged into '${allowed_to}'"
+              exit 1
+            fi
           fi
+          echo 'Branch merge rule check succeeded'
