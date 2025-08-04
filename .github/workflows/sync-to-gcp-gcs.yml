@@ -1,13 +1,13 @@
-name: Upload to AWS S3
+name: Sync to GCP Cloud Storage
 on:
   workflow_call:
     inputs:
-      uploader-role:
-        description: The ARN of the AWS role used for uploading
+      workload-identity-provider:
+        description: Full identifier of the GitHub workload identity pool provider in Google Cloud
         type: string
         required: true
-      region:
-        description: The AWS region to use for authorization
+      service-account:
+        description: Email of the Google Cloud service account used for syncing
         type: string
         required: true
       bucket:
@@ -15,10 +15,14 @@ on:
         type: string
         required: true
       path:
-        description: The path to upload
+        description: The path to sync
         type: string
         required: false
         default: .
+      target-path:
+        description: The target path to use
+        type: string
+        required: false
       reference:
         description: The git branch, tag or SHA to checkout
         type: string
@@ -34,11 +38,11 @@ on:
         required: false
         default: --exclude ".git/*" --exclude ".github/*"
 
-concurrency: ${{ github.workflow }}-publish-${{ github.ref }}
+concurrency: ${{ github.workflow }}-sync-${{ github.ref }}
 
 jobs:
-  upload:
-    name: Upload to AWS S3
+  sync:
+    name: Sync to GCP Cloud Storage
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -49,14 +53,18 @@ jobs:
           fetch-depth: ${{ inputs.fetch-depth }}
           ref: ${{ inputs.reference }}
 
-      - name: Authenticate to Amazon Web Services
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Authenticate to Google Cloud Platform
+        uses: google-github-actions/auth@v2
         with:
-          aws-region: ${{ inputs.region }}
-          role-to-assume: ${{ inputs.uploader-role }}
+          workload_identity_provider: ${{ inputs.workload-identity-provider }}
+          service_account: ${{ inputs.service-account }}
 
-      - name: Upload files
+      - name: Sync files
         shell: bash
         run: >-
           aws s3 sync --delete "${{ inputs.path }}" "s3://${{ inputs.bucket }}" \
              ${{ inputs.sync-args }}
+
+          gcloud storage rsync "${{ inputs.path }}" \
+            "gs://${{ inputs.bucket }}/${{ inputs.target-path }}" \
+            --recursive --delete-unmatched-destination-objects ${{ inputs.sync-args }}
