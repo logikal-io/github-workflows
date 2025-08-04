@@ -1,0 +1,62 @@
+name: Sync to AWS S3
+on:
+  workflow_call:
+    inputs:
+      sync-role:
+        description: The ARN of the AWS role used for syncing
+        type: string
+        required: true
+      region:
+        description: The AWS region to use for authorization
+        type: string
+        required: true
+      bucket:
+        description: The name of the target bucket
+        type: string
+        required: true
+      path:
+        description: The path to sync
+        type: string
+        required: false
+        default: .
+      reference:
+        description: The git branch, tag or SHA to checkout
+        type: string
+        required: false
+      fetch-depth:
+        description: Number of commits to fetch
+        type: string
+        required: false
+        default: 1
+      sync-args:
+        description: Additional arguments to use for the synchronization
+        type: string
+        required: false
+        default: --exclude ".git/*" --exclude ".github/*"
+
+concurrency: ${{ github.workflow }}-sync-${{ github.ref }}
+
+jobs:
+  sync:
+    name: Sync to AWS S3
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: ${{ inputs.fetch-depth }}
+          ref: ${{ inputs.reference }}
+
+      - name: Authenticate to Amazon Web Services
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ inputs.region }}
+          role-to-assume: ${{ inputs.sync-role }}
+
+      - name: Sync files
+        shell: bash
+        run: >-
+          aws s3 sync --delete "${{ inputs.path }}" "s3://${{ inputs.bucket }}" \
+             ${{ inputs.sync-args }}
