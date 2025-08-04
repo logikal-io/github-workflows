@@ -62,9 +62,6 @@ jobs:
       - name: Sync files
         shell: bash
         run: >-
-          aws s3 sync --delete "${{ inputs.path }}" "s3://${{ inputs.bucket }}" \
-             ${{ inputs.sync-args }}
-
           gcloud storage rsync "${{ inputs.path }}" \
             "gs://${{ inputs.bucket }}/${{ inputs.target-path }}" \
             --recursive --delete-unmatched-destination-objects ${{ inputs.sync-args }}
