@@ -93,8 +93,7 @@ jobs:
         run: |-
           gcloud run jobs execute "${{ inputs.command-job-name }}" \
             --region "${{ inputs.region }}" \
-            --args 'manage migrate' \
-            --wait
+            --args 'manage migrate' --wait
 
       #############################################################################################
       #                                                                                           #
@@ -112,8 +111,7 @@ jobs:
         run: |-
           gcloud run jobs execute "${{ inputs.command-job-name }}" \
             --region "${{ inputs.region }}" \
-            --args 'manage syncdb --no-input' \
-            --wait
+            --args 'manage syncdb --no-input' --wait
       #############################################################################################
       #                                        END OF DANGER                                      #
       #############################################################################################
