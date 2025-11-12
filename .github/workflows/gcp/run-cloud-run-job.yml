@@ -47,5 +47,6 @@ jobs:
 
       - name: Run job
         run: |-
-          gcloud run jobs execute "${{ inputs.name }}" --region "${{ inputs.region }}" \
+          gcloud run jobs execute "${{ inputs.name }}" \
+            --region "${{ inputs.region }}" \
             --args '${{ inputs.args }}' --wait
