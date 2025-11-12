@@ -46,7 +46,7 @@ concurrency: ${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
 
 jobs:
   publish-service:
-    name: Publish Cloud Run service
+    name: Publish service
     runs-on: ubuntu-24.04
     permissions:
       contents: read

@@ -37,7 +37,7 @@ concurrency: ${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
 
 jobs:
   publish-site:
-    name: Publish static site
+    name: Publish site
     runs-on: ubuntu-24.04
     permissions:
       contents: read
