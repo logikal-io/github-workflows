@@ -2,16 +2,16 @@ name: Sync to AWS S3
 on:
   workflow_call:
     inputs:
-      sync-role:
+      role:
         description: The ARN of the AWS role used for syncing
         type: string
         required: true
       region:
-        description: The AWS region to use for authorization
+        description: The AWS region to use
         type: string
         required: true
-      bucket:
-        description: The name of the target bucket
+      bucket-name:
+        description: The name of the bucket
         type: string
         required: true
       path:
@@ -20,7 +20,7 @@ on:
         required: false
         default: .
       reference:
-        description: The git branch, tag or SHA to checkout
+        description: The git branch, tag or SHA to check out
         type: string
         required: false
       fetch-depth:
@@ -34,7 +34,7 @@ on:
         required: false
         default: --exclude ".git/*" --exclude ".github/*"
 
-concurrency: ${{ github.workflow }}-sync-${{ github.ref }}
+concurrency: ${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
 
 jobs:
   sync:
@@ -44,19 +44,20 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v5
         with:
           fetch-depth: ${{ inputs.fetch-depth }}
           ref: ${{ inputs.reference }}
 
       - name: Authenticate to Amazon Web Services
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           aws-region: ${{ inputs.region }}
-          role-to-assume: ${{ inputs.sync-role }}
+          role-to-assume: ${{ inputs.role }}
 
       - name: Sync files
         shell: bash
         run: >-
-          aws s3 sync --delete "${{ inputs.path }}" "s3://${{ inputs.bucket }}" \
+          aws s3 sync --delete "${{ inputs.path }}" "s3://${{ inputs.bucket-name }}" \
              ${{ inputs.sync-args }}

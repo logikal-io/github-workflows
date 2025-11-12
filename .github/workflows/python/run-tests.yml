@@ -22,8 +22,8 @@ on:
         type: string
         required: false
         default: 1
-      pytest-options:
-        description: The pytest command-line arguments to use
+      pytest-args:
+        description: Additional pytest command-line arguments to use
         type: string
         required: false
       playbook-roles:
@@ -36,7 +36,7 @@ on:
         required: false
         default: '{}'
       upload-artifacts:
-        description: Whether the upload artifacts when tests fail
+        description: Whether to upload artifacts when tests fail
         type: boolean
         required: false
         default: true
@@ -58,7 +58,7 @@ on:
         required: false
 
 concurrency:
-  group: ${{ github.workflow }}-python-${{ github.ref || github.run_id }}
+  group: ${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
@@ -69,12 +69,13 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v5
         with:
           fetch-depth: ${{ inputs.fetch-depth }}
 
       - name: Authenticate to Google Cloud Platform
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         env:
           RUN_STEP: ${{ inputs.gcp-testing-service-account != '' }}
         if: env.RUN_STEP == 'true'
@@ -83,7 +84,7 @@ jobs:
           service_account: ${{ inputs.gcp-testing-service-account }}
 
       - name: Authenticate to Amazon Web Services
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         env:
           RUN_STEP: ${{ inputs.aws-testing-role != '' }}
         if: env.RUN_STEP == 'true'
@@ -91,7 +92,8 @@ jobs:
           aws-region: ${{ inputs.aws-testing-region }}
           role-to-assume: ${{ inputs.aws-testing-role }}
 
-      - uses: actions/setup-python@v5
+      - name: Install Python
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ inputs.python-version }}
 
@@ -102,7 +104,8 @@ jobs:
           roles: ${{ inputs.playbook-roles }}
           vars: ${{ inputs.playbook-vars }}
 
-      - uses: google-github-actions/setup-gcloud@v2
+      - name: Install gcloud CLI
+        uses: google-github-actions/setup-gcloud@v3
         env:
           RUN_STEP: ${{ inputs.gcp-testing-service-account != '' }}
         if: env.RUN_STEP == 'true'
@@ -113,7 +116,8 @@ jobs:
         if: env.RUN_STEP == 'true'
         run: gcloud auth configure-docker --quiet marketplace.gcr.io
 
-      - uses: logikal-io/make-orb@v1
+      - name: Install requirements
+        uses: logikal-io/make-orb@v1
         with:
           requirements: ${{ inputs.requirements }}
 
@@ -148,10 +152,10 @@ jobs:
           sudo service apparmor reload
 
       - name: Run pytest
-        run: orb --command 'pytest ${{ inputs.pytest-options }}'
+        run: orb --command 'pytest ${{ inputs.pytest-args }}'
 
       - name: Upload pytest artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure() && inputs.upload-artifacts
         with:
           name: pytest-artifacts

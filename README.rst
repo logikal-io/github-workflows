@@ -7,7 +7,7 @@ workflows via the ``uses`` keyword:
 
     jobs:
       run-python-tests:
-        uses: logikal-io/github-workflows/.github/workflows/run-python-tests.yml@v10
+        uses: logikal-io/github-workflows/.github/workflows/python/run-tests.yml@v11
         permissions:
           contents: read
           id-token: write

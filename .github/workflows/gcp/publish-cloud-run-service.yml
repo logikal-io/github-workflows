@@ -1,0 +1,125 @@
+name: Publish Cloud Run service
+on:
+  workflow_call:
+    inputs:
+      workload-identity-provider:
+        description: Full identifier of the GitHub workload identity pool provider in Google Cloud
+        type: string
+        required: true
+      service-account-email:
+        description: Email of the Google Cloud service account for publishing the Cloud Run service
+        type: string
+        required: true
+      region:
+        description: The Google Cloud region to use
+        type: string
+        required: true
+      repository:
+        description: The Google Cloud Artifact Registry repository to use
+        type: string
+        required: true
+      name:
+        description: The name of the service
+        type: string
+        required: true
+      dockerfile:
+        description: The path to the relevant Dockerfile
+        type: string
+        required: false
+        default: Dockerfile
+      build-path:
+        description: The build path to use
+        type: string
+        required: false
+        default: .
+      command-job-name:
+        description: The name of the command job
+        type: string
+        required: true
+      use-synthetic-data:
+        description: Whether to populate the service's database with synthetic data
+        type: boolean
+        required: false
+        default: false
+
+concurrency: ${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
+
+jobs:
+  publish-service:
+    name: Publish Cloud Run service
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Authenticate to Google Cloud Platform
+        uses: google-github-actions/auth@v3
+        id: gcp
+        with:
+          workload_identity_provider: ${{ inputs.workload-identity-provider }}
+          service_account: ${{ inputs.service-account-email }}
+
+      - name: Install gcloud CLI
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Build and push image
+        env:
+          name: ${{ inputs.name }}:${{ github.sha }}
+          registry: ${{ inputs.region }}-docker.pkg.dev
+          registry_path: ${{ steps.gcp.outputs.project_id }}/${{ inputs.repository }}
+        id: image
+        run: |-
+          gcloud auth configure-docker --quiet marketplace.gcr.io
+          gcloud auth configure-docker --quiet "${registry}"
+          image_url="${registry}/${registry_path}/${name}"
+          echo "image_url=${image_url}" >> $GITHUB_OUTPUT
+          docker build --tag "${image_url}" --file "${{ inputs.dockerfile }}" \
+            "${{ inputs.build-path }}"
+          docker push "${image_url}"
+
+      - name: Update command job
+        run: |-
+          gcloud run jobs update "${{ inputs.command-job-name }}" \
+            --region "${{ inputs.region }}" \
+            --image "${{ steps.image.outputs.image_url }}"
+
+      - name: Apply migrations
+        if: ! inputs.use-synthetic-data
+        run: |-
+          gcloud run jobs execute "${{ inputs.command-job-name }}" \
+            --region "${{ inputs.region }}" \
+            --args 'manage migrate' \
+            --wait
+
+      #############################################################################################
+      #                                                                                           #
+      #                            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                           #
+      #                            !! WARNING: SEVERE DATA LOSS RISK !!                           #
+      #                            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                           #
+      #                                                                                           #
+      #  Please DO NOT CHANGE the following step unless you are absolutely sure that your changes #
+      #  will not cause any data loss. If you must make a change, make sure to rigorously test    #
+      #  that your changes only have the intended consequences.                                   #
+      #                                                                                           #
+      #############################################################################################
+      - name: Populate database
+        if: inputs.use-synthetic-data
+        run: |-
+          gcloud run jobs execute "${{ inputs.command-job-name }}" \
+            --region "${{ inputs.region }}" \
+            --args 'manage syncdb --no-input' \
+            --wait
+      #############################################################################################
+      #                                        END OF DANGER                                      #
+      #############################################################################################
+
+      - name: Update service
+        run: >-
+          gcloud run deploy "${{ inputs.name }}" \
+            --region "${{ inputs.region }}" \
+            --image "${{ steps.image.outputs.image_url }}"

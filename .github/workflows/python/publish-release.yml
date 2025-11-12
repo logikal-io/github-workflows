@@ -34,19 +34,19 @@ on:
         description: Full identifier of the GitHub workload identity pool provider in Google Cloud
         type: string
         required: true
-      docs-uploader-service-account:
-        description: Email of the Google Cloud service account for uploading documentation files
+      docs-service-account-email:
+        description: Email of the Google Cloud service account for publishing documentation files
         type: string
         required: true
-      docs-target-bucket:
-        description: The gsutil target bucket path to upload the documentation to
+      docs-bucket-name:
+        description: The bucket name to upload the documentation to
         type: string
         required: true
-      docs-website-service-url-map:
-        description: The website service URL map name to use for CDN cache invalidation
+      docs-url-map-name:
+        description: The URL map name to use for CDN cache invalidation
         type: string
         required: true
-      docs-https-redirect-url-map:
+      docs-http-to-https-url-map-name:
         description: The HTTP to HTTPS redirection URL map name to use for CDN cache invalidation
         type: string
         required: true
@@ -57,28 +57,29 @@ on:
         required: true
 
 jobs:
-  documentation:
+  publish-docs:
     name: Publish documentation
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Authenticate to Google Cloud Platform
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ inputs.docs-workload-identity-provider }}
-          service_account: ${{ inputs.docs-uploader-service-account }}
+          service_account: ${{ inputs.docs-service-account-email }}
 
       - name: Install gcloud CLI
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@v3
 
       - name: Install Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ inputs.python-version }}
 
@@ -89,7 +90,8 @@ jobs:
           roles: ${{ inputs.playbook-roles }}
           vars: ${{ inputs.playbook-vars }}
 
-      - uses: logikal-io/make-orb@v1
+      - name: Install requirements
+        uses: logikal-io/make-orb@v1
         with:
           requirements: ${{ inputs.docs-requirements }}
 
@@ -111,33 +113,36 @@ jobs:
             exit 1
           fi
           gsutil -m rsync -r -d -j html,css,js -x "\.buildinfo|\.doctrees" \
-            docs/build "gs://${{ inputs.docs-target-bucket }}/${{ inputs.name }}/${version}"
+            docs/build "gs://${{ inputs.docs-bucket-name }}/${{ inputs.name }}/${version}"
 
       - name: Upload latest documentation
         if: github.ref_name == steps.tags.outputs.latest
         run: >-
           gsutil -m rsync -r -d -j html,css,js -x "\.buildinfo|\.doctrees" \
-            docs/build "gs://${{ inputs.docs-target-bucket }}/${{ inputs.name }}/latest"
+            docs/build "gs://${{ inputs.docs-bucket-name }}/${{ inputs.name }}/latest"
 
       - name: Invalidate CDN cache
         if: github.ref_name == steps.tags.outputs.latest
         run: |-
           gcloud compute url-maps invalidate-cdn-cache \
-            "${{ inputs.docs-website-service-url-map }}" --path "/${{ inputs.name }}/latest/*"
+            "${{ inputs.docs-url-map-name }}" --path "/${{ inputs.name }}/latest/*"
           gcloud compute url-maps invalidate-cdn-cache \
-            "${{ inputs.docs-https-redirect-url-map }}" --path "/${{ inputs.name }}/latest/*"
+            "${{ inputs.docs-http-to-https-url-map-name }}" --path "/${{ inputs.name }}/latest/*"
 
-  package:
+  publish-package:
     name: Publish package
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - name: Install Python
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ inputs.python-version }}
 
-      - uses: logikal-io/make-orb@v1
+      - name: Install requirements
+        uses: logikal-io/make-orb@v1
         with:
           requirements: ${{ inputs.build-requirements }}
 

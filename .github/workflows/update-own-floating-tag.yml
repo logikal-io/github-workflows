@@ -6,6 +6,6 @@ on:
 jobs:
   update-floating-tag:
     name: Update floating tag
-    uses: ./.github/workflows/update-floating-tag.yml
+    uses: ./.github/workflows/github/update-floating-tag.yml
     permissions:
       contents: write
