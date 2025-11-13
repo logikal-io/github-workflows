@@ -1,4 +1,4 @@
-name: Sync to GCP Cloud Storage
+name: Sync to Google Cloud Storage
 on:
   workflow_call:
     inputs:
@@ -6,11 +6,11 @@ on:
         description: Full identifier of the GitHub workload identity pool provider in Google Cloud
         type: string
         required: true
-      service-account:
+      service-account-email:
         description: Email of the Google Cloud service account used for syncing
         type: string
         required: true
-      bucket:
+      bucket-name:
         description: The name of the target bucket
         type: string
         required: true
@@ -24,7 +24,7 @@ on:
         type: string
         required: false
       reference:
-        description: The git branch, tag or SHA to checkout
+        description: The git branch, tag or SHA to check out
         type: string
         required: false
       fetch-depth:
@@ -38,30 +38,31 @@ on:
         required: false
         default: --exclude ".git/*" --exclude ".github/*"
 
-concurrency: ${{ github.workflow }}-sync-${{ github.ref }}
+concurrency: ${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
 
 jobs:
   sync:
-    name: Sync to GCP Cloud Storage
+    name: Sync to Google Cloud Storage
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v5
         with:
           fetch-depth: ${{ inputs.fetch-depth }}
           ref: ${{ inputs.reference }}
 
       - name: Authenticate to Google Cloud Platform
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ inputs.workload-identity-provider }}
-          service_account: ${{ inputs.service-account }}
+          service_account: ${{ inputs.service-account-email }}
 
       - name: Sync files
         shell: bash
         run: >-
           gcloud storage rsync "${{ inputs.path }}" \
-            "gs://${{ inputs.bucket }}/${{ inputs.target-path }}" \
+            "gs://${{ inputs.bucket-name }}/${{ inputs.target-path }}" \
             --recursive --delete-unmatched-destination-objects ${{ inputs.sync-args }}

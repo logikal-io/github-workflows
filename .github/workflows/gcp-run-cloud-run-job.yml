@@ -1,4 +1,4 @@
-name: Run dynamic website command
+name: Run Cloud Run job
 on:
   workflow_call:
     inputs:
@@ -6,47 +6,47 @@ on:
         description: Full identifier of the GitHub workload identity pool provider in Google Cloud
         type: string
         required: true
-      service-account:
+      service-account-email:
         description: Email of the Google Cloud service account for running the maintenance
         type: string
         required: true
-      image-name:
-        description: The name of the image
+      region:
+        description: The Google Cloud region to use
         type: string
         required: true
-      gcp-region:
-        description: The GCP region to use
+      name:
+        description: The name of the job
         type: string
         required: true
-      command:
-        description: The command to run
+      args:
+        description: The arguments to use
         type: string
         required: true
 
-concurrency: ${{ github.workflow }}-publish-${{ github.ref }}
+concurrency: ${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
 
 jobs:
-  run-command:
-    name: Run command
+  run-job:
+    name: Run job
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Authenticate to Google Cloud Platform
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         id: gcp
         with:
           workload_identity_provider: ${{ inputs.workload-identity-provider }}
-          service_account: ${{ inputs.service-account }}
+          service_account: ${{ inputs.service-account-email }}
 
-      - name: Run command
+      - name: Run job
         run: |-
-          gcloud run jobs execute "${{ inputs.image-name }}-website-command" \
-            --region "${{ inputs.gcp-region }}" \
-            --args '${{ inputs.command }}' \
-            --wait
+          gcloud run jobs execute "${{ inputs.name }}" \
+            --region "${{ inputs.region }}" \
+            --args '${{ inputs.args }}' --wait

@@ -6,15 +6,19 @@ on:
         description: Full identifier of the GitHub workload identity pool provider in Google Cloud
         type: string
         required: true
-      service-account:
-        description: Email of the Google Cloud service account for pushing the image
+      service-account-email:
+        description: Email of the Google Cloud service account used for pushing the image
         type: string
         required: true
-      image-repository:
-        description: The GCP Artifact Registry repository to use
+      region:
+        description: The Google Cloud region to use
         type: string
         required: true
-      image-name:
+      repository:
+        description: The Google Cloud Artifact Registry repository to use
+        type: string
+        required: true
+      name:
         description: The name of the image
         type: string
         required: true
@@ -28,10 +32,6 @@ on:
         type: string
         required: false
         default: .
-      gcp-region:
-        description: The GCP region to use
-        type: string
-        required: true
       update-cloud-run-job:
         description: The name of the Google Cloud Run job to update to use the newly built image
         type: string
@@ -45,25 +45,26 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Authenticate to Google Cloud Platform
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         id: gcp
         with:
           workload_identity_provider: ${{ inputs.workload-identity-provider }}
-          service_account: ${{ inputs.service-account }}
+          service_account: ${{ inputs.service-account-email }}
 
       - name: Install gcloud CLI
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@v3
 
       - name: Build and push image
         env:
-          name: ${{ inputs.image-name }}:${{ github.sha }}
-          registry: ${{ inputs.gcp-region }}-docker.pkg.dev
-          registry_path: ${{ steps.gcp.outputs.project_id }}/${{ inputs.image-repository }}
+          name: ${{ inputs.name }}:${{ github.sha }}
+          registry: ${{ inputs.region }}-docker.pkg.dev
+          registry_path: ${{ steps.gcp.outputs.project_id }}/${{ inputs.repository }}
         id: image
         run: |-
           gcloud auth configure-docker --quiet marketplace.gcr.io
@@ -78,5 +79,5 @@ jobs:
         if: inputs.update-cloud-run-job != ''
         run: |-
           gcloud run jobs update "${{ inputs.update-cloud-run-job }}" \
-            --region "${{ inputs.gcp-region }}" \
+            --region "${{ inputs.region }}" \
             --image "${{ steps.image.outputs.image_url }}"

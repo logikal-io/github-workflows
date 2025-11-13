@@ -2,7 +2,7 @@ name: Update floating tag
 on:
   workflow_call:
 
-concurrency: ${{ github.workflow }}-publish-${{ github.ref }}
+concurrency: ${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
 
 jobs:
   update-tag:
@@ -11,7 +11,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           fetch-tags: true

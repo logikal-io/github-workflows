@@ -1,4 +1,4 @@
-name: Publish static website
+name: Publish static site
 on:
   workflow_call:
     inputs:
@@ -6,19 +6,19 @@ on:
         description: Full identifier of the GitHub workload identity pool provider in Google Cloud
         type: string
         required: true
-      uploader-service-account:
-        description: Email of the Google Cloud service account for uploading the website files
+      service-account-email:
+        description: Email of the Google Cloud service account for publishing the static site files
         type: string
         required: true
-      target-bucket:
-        description: The gsutil target bucket path to upload the static files to
+      bucket-name:
+        description: The bucket name to upload the static site files to
         type: string
         required: true
-      website-service-url-map:
-        description: The website service URL map name to use for CDN cache invalidation
+      url-map-name:
+        description: The URL map name to use for CDN cache invalidation
         type: string
         required: true
-      https-redirect-url-map:
+      http-to-https-url-map-name:
         description: The HTTP to HTTPS redirection URL map name to use for CDN cache invalidation
         type: string
         required: true
@@ -28,40 +28,42 @@ on:
         required: false
         default: 3.12
       requirements:
-        description: The requirements file to use for generating the static files.
+        description: The requirements file to use for generating the static site files
         type: string
         required: false
         default: requirements/dev.txt
 
-concurrency: ${{ github.workflow }}-publish-${{ github.ref }}
+concurrency: ${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
 
 jobs:
-  website:
-    name: Publish website
+  publish-site:
+    name: Publish site
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Authenticate to Google Cloud Platform
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ inputs.workload-identity-provider }}
-          service_account: ${{ inputs.uploader-service-account }}
+          service_account: ${{ inputs.service-account-email }}
 
       - name: Install gcloud CLI
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@v3
 
       - name: Install Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ inputs.python-version }}
 
-      - uses: logikal-io/make-orb@v1
+      - name: Install requirements
+        uses: logikal-io/make-orb@v1
         with:
           requirements: ${{ inputs.requirements }}
 
@@ -73,11 +75,11 @@ jobs:
 
       - name: Upload files
         shell: bash
-        run: gsutil -m rsync -r -d -j html,css,js generated "gs://${{ inputs.target-bucket }}/"
+        run: gsutil -m rsync -r -d -j html,css,js generated "gs://${{ inputs.bucket-name }}/"
 
       - name: Invalidate CDN cache
         run: |-
           gcloud compute url-maps invalidate-cdn-cache \
-            "${{ inputs.website-service-url-map }}" --path "/*"
+            "${{ inputs.url-map-name }}" --path "/*"
           gcloud compute url-maps invalidate-cdn-cache \
-            "${{ inputs.https-redirect-url-map }}" --path "/*"
+            "${{ inputs.http-to-https-url-map-name }}" --path "/*"

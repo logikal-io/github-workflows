@@ -2,8 +2,8 @@ name: Run Terraform tests
 on:
   workflow_call:
     inputs:
-      root-dir:
-        description: The root directory in which to run Terragrunt
+      terragrunt-dir:
+        description: The directory in which to run Terragrunt
         type: string
         required: false
         default: cloud
@@ -11,17 +11,17 @@ on:
         description: The version of terragrunt-commons to use
         type: string
         required: false
-        default: v3
+        default: v4
       tfenv-version:
         description: The version of tfenv to use
         type: string
         required: false
-        default: 39d8c27ad9862ffdec57989b66fd2720cb72e76c  # commit 2023-12-19 / checked 2024-10-25
+        default: c8eb402135bf6fbcd2809f6cdbf7ea1113de6e54  # commit 2025-07-11 / checked 2025-10-31
       tgenv-version:
         description: The version of tgenv to use
         type: string
         required: false
-        default: 8f87cb3bd76063d6adef2413ce0a399f773f2319  # commit 2024-06-14 / checked 2024-10-25
+        default: 8f87cb3bd76063d6adef2413ce0a399f773f2319  # commit 2024-06-14 / checked 2025-10-31
 
     secrets:
       TERRAFORM_CREDENTIALS_HOSTNAME:
@@ -32,7 +32,7 @@ on:
         required: false
 
 concurrency:
-  group: ${{ github.workflow }}-terraform-${{ github.ref || github.run_id }}
+  group: ${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
@@ -40,7 +40,8 @@ jobs:
     name: Run tests
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v5
 
       - name: Install Terraform
         uses: logikal-io/run-logikal-playbook@v2
@@ -53,17 +54,17 @@ jobs:
           }'
 
       - name: Install Terraform binary
-        working-directory: ${{ inputs.root-dir }}
+        working-directory: ${{ inputs.terragrunt-dir }}
         run: tfenv install
 
       - name: Install Terragrunt binary
-        working-directory: ${{ inputs.root-dir }}
+        working-directory: ${{ inputs.terragrunt-dir }}
         run: tgenv install
 
       - name: Validate configuration
-        working-directory: ${{ inputs.root-dir }}
+        working-directory: ${{ inputs.terragrunt-dir }}
         env:
-          TERRAGRUNT_USE_CREDENTIALS: false
+          TG_COMMONS_LOCAL_MODE: true
           CREDENTIALS_HOSTNAME: ${{ secrets.TERRAFORM_CREDENTIALS_HOSTNAME || 'app.terraform.io' }}
           CREDENTIALS_TOKEN: ${{ secrets.TERRAFORM_CREDENTIALS_TOKEN }}
         run: |-
@@ -71,4 +72,4 @@ jobs:
             hostname="$(echo "${CREDENTIALS_HOSTNAME}" | sed 's/\./_/g' | sed 's/-/__/g')"
             export "TF_TOKEN_${hostname}"="${CREDENTIALS_TOKEN}"
           fi
-          terragrunt run-all validate --terragrunt-parallelism 1
+          terragrunt run --all validate --parallelism 1

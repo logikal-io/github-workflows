@@ -2,6 +2,14 @@ name: Push image
 on:
   workflow_call:
     inputs:
+      role:
+        description: The AWS role to assume
+        type: string
+        required: true
+      region:
+        description: The AWS region to use
+        type: string
+        required: true
       name:
         description: The name of the image
         type: string
@@ -16,14 +24,6 @@ on:
         type: string
         required: false
         default: .
-      aws-role-to-assume:
-        description: The AWS role to assume
-        type: string
-        required: true
-      aws-region:
-        description: The AWS region to use
-        type: string
-        required: true
 
 jobs:
   push-image:
@@ -33,24 +33,25 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v5
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Authenticate to Amazon Web Services
+        uses: aws-actions/configure-aws-credentials@v5
         id: aws
         with:
-          role-to-assume: ${{ inputs.aws-role-to-assume }}
-          aws-region: ${{ inputs.aws-region }}
+          role-to-assume: ${{ inputs.role }}
+          aws-region: ${{ inputs.region }}
 
       - name: Build and push image
         env:
           name: ${{ inputs.name }}:latest
           registry: >-
-            ${{ steps.aws.outputs.aws-account-id }}.dkr.ecr.${{ inputs.aws-region }}.amazonaws.com
+            ${{ steps.aws.outputs.aws-account-id }}.dkr.ecr.${{ inputs.region }}.amazonaws.com
         run: |-
           aws ecr-public get-login-password --region us-east-1 | \
               docker login --username AWS --password-stdin public.ecr.aws
-          aws ecr get-login-password --region "${{ inputs.aws-region }}" | \
+          aws ecr get-login-password --region "${{ inputs.region }}" | \
               docker login --username AWS --password-stdin "${registry}"
           docker build --tag "${registry}/${name}" --file "${{ inputs.dockerfile }}" \
               "${{ inputs.build-path }}"
