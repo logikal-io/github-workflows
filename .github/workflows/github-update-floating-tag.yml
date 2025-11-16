@@ -2,7 +2,8 @@ name: Update floating tag
 on:
   workflow_call:
 
-concurrency: ${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
+concurrency: >-
+  github-update-floating-tag-${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
 
 jobs:
   update-tag:

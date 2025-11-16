@@ -38,7 +38,7 @@ on:
         required: false
         default: --exclude ".git/*" --exclude ".github/*"
 
-concurrency: ${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
+concurrency: gcp-sync-to-gcs-${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
 
 jobs:
   sync:

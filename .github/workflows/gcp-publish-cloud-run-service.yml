@@ -42,7 +42,8 @@ on:
         required: false
         default: false
 
-concurrency: ${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
+concurrency: >-
+  gcp-publish-cloud-run-service-${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
 
 jobs:
   publish-service:
