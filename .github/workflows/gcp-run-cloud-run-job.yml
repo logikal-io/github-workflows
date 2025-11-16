@@ -23,7 +23,7 @@ on:
         type: string
         required: true
 
-concurrency: ${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
+concurrency: gcp-run-cloud-run-job-${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
 
 jobs:
   run-job:

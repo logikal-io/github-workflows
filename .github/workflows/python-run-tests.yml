@@ -58,7 +58,7 @@ on:
         required: false
 
 concurrency:
-  group: ${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
+  group: python-run-tests-${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:

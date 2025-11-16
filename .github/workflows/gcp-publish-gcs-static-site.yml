@@ -33,7 +33,8 @@ on:
         required: false
         default: requirements/dev.txt
 
-concurrency: ${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
+concurrency: >-
+  gcp-publish-gcs-static-site-${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
 
 jobs:
   publish-site:
