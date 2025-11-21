@@ -90,7 +90,7 @@ jobs:
             --image "${{ steps.image.outputs.image_url }}"
 
       - name: Apply migrations
-        if: ! inputs.use-synthetic-data
+        if: !inputs.use-synthetic-data
         run: |-
           gcloud run jobs execute "${{ inputs.command-job-name }}" \
             --region "${{ inputs.region }}" \
