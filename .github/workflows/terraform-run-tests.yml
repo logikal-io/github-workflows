@@ -16,17 +16,17 @@ on:
         description: The version of tfenv to use
         type: string
         required: false
-        default: c8eb402135bf6fbcd2809f6cdbf7ea1113de6e54  # commit 2025-07-11 / checked 2026-03-06
+        default: v3.2.2  # release 2026-04-28 / checked 2026-05-28
       tgenv-version:
         description: The version of tgenv to use
         type: string
         required: false
-        default: fc6b4bc42913126ab3c0061896ba0fa920e07a84  # commit 2025-11-18 / checked 2026-03-06
+        default: 69162e8e38dda958b8dda29dd940a2645a4b0ac2  # commit 2026-05-21 / checked 2026-05-28
       tflint-version:
         description: The version of TFLint to use
         type: string
         required: false
-        default: 0.61.0  # release 2026-02-07 / checked 2026-03-06
+        default: 0.62.1  # release 2026-05-13 / checked 2026-05-28
 
     secrets:
       TERRAFORM_CREDENTIALS_HOSTNAME:
