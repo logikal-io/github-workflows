@@ -40,6 +40,9 @@ concurrency:
   group: terraform-run-tests-${{ github.workflow_ref }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   run-tests:
     name: Run tests
@@ -73,6 +76,9 @@ jobs:
           TG_COMMONS_LOCAL_MODE: true
           CREDENTIALS_HOSTNAME: ${{ secrets.TERRAFORM_CREDENTIALS_HOSTNAME || 'app.terraform.io' }}
           CREDENTIALS_TOKEN: ${{ secrets.TERRAFORM_CREDENTIALS_TOKEN }}
+          # See https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md
+          # (avoiding rate limiting)
+          GITHUB_TOKEN: ${{ github.token }}
         run: |-
           if [[ -n "${CREDENTIALS_TOKEN}" ]]; then
             hostname="$(echo "${CREDENTIALS_HOSTNAME}" | sed 's/\./_/g' | sed 's/-/__/g')"
