@@ -16,17 +16,17 @@ on:
         description: The version of tfenv to use
         type: string
         required: false
-        default: v3.2.2  # release 2026-04-28 / checked 2026-05-28
+        default: v3.2.2  # release 2026-04-28 / checked 2026-08-18
       tgenv-version:
         description: The version of tgenv to use
         type: string
         required: false
-        default: 69162e8e38dda958b8dda29dd940a2645a4b0ac2  # commit 2026-05-21 / checked 2026-05-28
+        default: 7940310f043c885570386540c6c468e251d7e146  # commit 2026-06-15 / checked 2026-08-18
       tflint-version:
         description: The version of TFLint to use
         type: string
         required: false
-        default: 0.62.1  # release 2026-05-13 / checked 2026-05-28
+        default: 0.64.0  # release 2026-07-17 / checked 2026-08-18
 
     secrets:
       TERRAFORM_CREDENTIALS_HOSTNAME:
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install Terraform
         uses: logikal-io/run-logikal-playbook@v2
